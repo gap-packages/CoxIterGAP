@@ -1,0 +1,71 @@
+# sample makefile
+CC = g++
+CXX = g++
+CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -O3
+LDFLAGS = -L/usr/local/lib -lpcre -lgmp -lgmpxx
+GAPARCH=@GAPARCH@
+BINDIR=bin/@GAPARCH@
+
+all: default
+
+default: main.o graph.o coxiter.o mpz_rational.o number_template.o regexp.o string.o graphs.list.o graphs.list.n.o graph.o graphs.product.set.o graphs.product.o graphs.list.iterator.o polynomials.o
+	$(CXX) $(CXXFLAGS) $(BINDIR)/main.o $(BINDIR)/coxiter.o $(BINDIR)/mpz_rational.o $(BINDIR)/number_template.o $(BINDIR)/regexp.o $(BINDIR)/string.o $(BINDIR)/graphs.list.o $(BINDIR)/graphs.list.n.o $(BINDIR)/graph.o $(BINDIR)/graphs.product.set.o $(BINDIR)/graphs.product.o $(BINDIR)/graphs.list.iterator.o $(BINDIR)/polynomials.o -o bin/$(GAPARCH)/coxiter $(LDFLAGS)
+	
+main.o : src/main.cpp
+	mkdir -p bin/$(GAPARCH)
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+coxiter.o : src/coxiter.cpp src/coxiter.h src/graphs.list.iterator.h src/graphs.list.h src/graphs.product.set.h src/graphs.product.h src/lib/regexp.h src/lib/string.h src/lib/numbers/mpz_rational.h src/lib/polynomials.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+# ----------------------------------------------------
+# Graphs
+graph.o : src/graph.cpp src/graph.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+graphs.list.o : src/graphs.list.cpp src/graphs.list.h src/graphs.list.n.h 
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+graphs.list.iterator.o : src/graphs.list.iterator.cpp src/graphs.list.iterator.h src/graphs.list.h 
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+graphs.list.n.o : src/graphs.list.n.cpp src/graphs.list.n.h src/graph.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+graphs.product.o : src/graphs.product.cpp src/graphs.product.h src/graph.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+graphs.product.set.o : src/graphs.product.set.cpp src/graphs.product.set.h src/graph.h src/graphs.product.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+# ----------------------------------------------------
+# Other libs	
+regexp.o : src/lib/regexp.cpp src/lib/regexp.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+string.o : src/lib/string.cpp src/lib/string.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+# ----------------------------------------------------
+# Maths
+mpz_rational.o : src/lib/numbers/mpz_rational.cpp src/lib/numbers/mpz_rational.h src/lib/regexp.h src/lib/string.h src/lib/numbers/number_template.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+number_template.o : src/lib/numbers/number_template.cpp src/lib/numbers/number_template.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+	
+polynomials.o : src/lib/polynomials.cpp src/lib/polynomials.h
+	$(CXX) $(CXXFLAGS) -c $< -o $(BINDIR)/$@
+
+# ----------------------------------------------------
+# Varia	
+clean:
+	rm -rf bin
+
+distclean: clean
+	rm -rf Makefile
+
+doc:
+	gap -A -q -T < makedocrel.g
+
+.PHONY: all default clean distclean doc
