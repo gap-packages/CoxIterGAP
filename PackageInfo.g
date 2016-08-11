@@ -10,7 +10,7 @@ SetPackageInfo( rec(
 
 PackageName := "CoxIter",
 Subtitle := "Computation of invariants of hyperbolic Coxeter groups",
-Version := "0.1",
+Version := "0.1b",
 Date := "08/08/2016", # dd/mm/yyyy format
 
 Persons := [
@@ -33,7 +33,7 @@ SourceRepository := rec(
 ),
 IssueTrackerURL := Concatenation( ~.SourceRepository.URL, "/issues" ),
 #SupportEmail   := "TODO",
-PackageWWWHome  := "https://rgugliel.github.io/CoxIterGAP/",
+PackageWWWHome  := "https://github.com/rgugliel/CoxIterGAP",
 PackageInfoURL  := Concatenation( ~.PackageWWWHome, "PackageInfo.g" ),
 README_URL      := Concatenation( ~.PackageWWWHome, "README.md" ),
 ArchiveURL      := Concatenation( ~.SourceRepository.URL,
@@ -71,8 +71,18 @@ Dependencies := rec(
 ),
 
 AvailabilityTest := function()
-        return true;
-    end,
+  local path, file;
+    # test for existence of the compiled binary
+    path:= DirectoriesPackagePrograms( "coxiter" );
+    file:= Filename( path, "coxiter" );
+    if file = fail then
+      LogPackageLoadingMessage( PACKAGE_WARNING,
+          [ "The program `CoxIter' is not compiled.",
+            "See the installation instructions;",
+            "type: ?Installing the Example package" ] );
+    fi;
+    return file <> fail;
+  end,
 
 TestFile := "tst/testall.g",
 
