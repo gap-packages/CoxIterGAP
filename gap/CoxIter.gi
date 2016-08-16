@@ -28,7 +28,7 @@ InstallMethod( CoxIterCompute,
 	"Call CoxIter to perform the computations of the invariants",
 	[ IsCoxIter ],
 	function( ci )
-		local cur_dir, ci_file, ci_stream, ci_output, mat_size, i, line, data;
+		local cur_dir, ci_file, ci_stream, ci_output, mat_size, i, line, data, fnum, fden;
 	
 		mat_size := Length(ci!.iCoxeterMatrix);
 		cur_dir := DirectoryCurrent();
@@ -59,9 +59,13 @@ InstallMethod( CoxIterCompute,
 			elif data[1] = "c" then ci!.iCocompact := EvalString(data[2]); 
 			elif data[1] = "euler" then ci!.rEulerCharacteristic := EvalString(data[2]);
 			elif data[1] = "fvector" then ci!.iFVector := EvalString(data[2]);
+			elif data[1] = "fnum" then fnum := Concatenation( "Product( [", data[2], "], i -> CyclotomicPolynomial(Rationals,i) )" );
+			elif data[1] = "fden" then fden := Concatenation( "ValuePol([", data[2], "], X(Rationals))" );
 			fi;
 		od;
 		CloseStream(ci_stream);
+		
+		ci!.pGrowthSeries := EvalString(fnum)/EvalString(fden);
 		
 		# -----------------------------------------
 		# Final
@@ -98,6 +102,14 @@ InstallMethod( EulerCharacteristic,
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
 		return obj!.rEulerCharacteristic;
+	end);
+	
+InstallMethod( GrowthSeries,
+	"for hyperbolic Coxeter groups", 
+	[IsCoxIter and IsCoxIterRep], 
+	function(obj)
+		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
+		return obj!.pGrowthSeries;
 	end);
 
 InstallMethod( CreateCoxIterFromCoxeterMatrix,

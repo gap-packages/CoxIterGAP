@@ -108,5 +108,18 @@ int main(int argc, char *argv[])
 		cout << "dimensionguessed:" << ci.get_iDimension() << endl;
 	if( ci.get_iDimension() )
 		cout << "fvector:[" << implode( ",", ci.get_iFVector() ) << "]" << endl;
+	else
+		cout << "[]" << endl;
+		
+	// Growth series
+	vector<unsigned int> iCyclotomicNumerator;
+	vector< mpz_class > iPolynomialDenominator;
+	bool bReduced;
+	ci.get_iGrowthSeries( iCyclotomicNumerator, iPolynomialDenominator, bReduced );
+	unsigned int iDenominatorSize( iPolynomialDenominator.size() );
+	cout << "fnum:" << implode( ",", iCyclotomicNumerator ) << endl;
+	cout << "fden:";
+	for( unsigned int i(0); i < iDenominatorSize; i++ )
+		cout << ( i ? "," : "" ) << iPolynomialDenominator[i];
 	return 0;
 }

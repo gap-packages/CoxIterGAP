@@ -12,8 +12,9 @@ DeclareAttribute( "Cofinite", IsCoxIter );
 DeclareAttribute( "Cocompact", IsCoxIter );
 DeclareAttribute( "EulerCharacteristic", IsCoxIter );
 DeclareAttribute( "FVector", IsCoxIter );
+DeclareAttribute( "GrowthSeries", IsCoxIter );
 
-IsCoxIterRep := NewRepresentation("IsCoxIter", IsObject and IsComponentObjectRep and IsAttributeStoringRep, [ "iCoxeterMatrix", "iDimension", "bInvariantsComputed", "iCofinite", "iCocompact", "iFVector", "rEulerCharacteristic" ]);
+IsCoxIterRep := NewRepresentation("IsCoxIter", IsObject and IsComponentObjectRep and IsAttributeStoringRep, [ "iCoxeterMatrix", "iDimension", "bInvariantsComputed", "iCofinite", "iCocompact", "iFVector", "rEulerCharacteristic", "pGrowthSeries" ]);
 
 CoxIterType := NewType( CoxIterFamily, IsCoxIter and IsCoxIterRep and IsAttributeStoringRep );
 
