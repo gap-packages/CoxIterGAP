@@ -11,14 +11,14 @@ DeclareCategory( "IsCoxIter", IsObject );
 DeclareAttribute( "Cofinite", IsCoxIter );
 DeclareAttribute( "Cocompact", IsCoxIter );
 
-IsCoxIterRep := NewRepresentation("IsCoxIter", IsObject and IsComponentObjectRep and IsAttributeStoringRep, [ "coxetermatrix"]);
+IsCoxIterRep := NewRepresentation("IsCoxIter", IsObject and IsComponentObjectRep and IsAttributeStoringRep, [ "iCoxeterMatrix", "bInvariantsComputed" ]);
 
 CoxIterType := NewType( CoxIterFamily, IsCoxIter and IsCoxIterRep and IsAttributeStoringRep );
 
 DeclareOperation( "CreateCoxIterFromCoxeterGraph", [ IsList ] );
+DeclareOperation( "CreateCoxIterFromCoxeterMatrix", [ IsMatrix ] );
+DeclareOperation( "CoxIterCompute", [ IsCoxiter ] );
 
-#! @Description
-#!   Insert documentation for you function here
+
 DeclareGlobalFunction( "CoxIter_Example" );
-
 DeclareGlobalFunction( "CoxIter_Compute" );

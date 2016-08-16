@@ -36,7 +36,7 @@ InstallMethod( ViewObj,
 	"for object in `IsCoxIter'",
 	[ IsCoxIter and IsCoxIterRep ],
 	function( obj )
-		Print( "TODO: viewobj" );
+		Print( "CoxIter : Coxeter group with ", Length( obj!.iCoxeterMatrix ) , " generators " );
 	end );
 
 InstallMethod( PrintObj,
@@ -73,6 +73,13 @@ ExpandSquareMatrix := function( mat, n, el )
 	od;
 end;
 
+InstallMethod( CreateCoxIterFromCoxeterMatrix,
+	"Create `CoxIter' from the Coxeter matrix",
+	[ IsMatrix ],
+	function( M )
+		return Objectify( CoxIterType, rec( iCoxeterMatrix := M, bInvariantsComputed := false ) );
+	end );
+
 InstallMethod( CreateCoxIterFromCoxeterGraph,	
 	"Create `CoxIter' from the Coxeter graph",
 	[ IsList ],
@@ -108,7 +115,6 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 						Error("Two different weights for edge(",starting_vertex,",",G[i][j][1],") given");
 					fi;
 					
-					Print("[",starting_vertex,",",G[i][j][1],"] <-- ",G[i][j][2],"\n");
 					mat[starting_vertex][G[i][j][1]] := G[i][j][2];
 					mat[G[i][j][1]][starting_vertex] := G[i][j][2];
 				fi;
@@ -120,5 +126,5 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 			mat[i][i] := 1;
 		od;
 		
-		return mat;
+		return CreateCoxIterFromCoxeterMatrix(mat);;
 	end );
