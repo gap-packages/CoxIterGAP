@@ -45,7 +45,7 @@ InstallMethod( CoxIterCompute,
 		WriteLine(ci_stream,"matrix:end");
 		WriteLine(ci_stream,"exit");
 		
-		# TODO: gérer si erreur
+		# TODO: gérer mieux si erreur
 		
 		# -----------------------------------------
 		# Reading information
@@ -54,6 +54,8 @@ InstallMethod( CoxIterCompute,
 			if line = fail then	break; fi;
 			
 			data := SplitString( line, ":" );
+			
+			if data[1] = "error" then Error("One error occured: ", data[2] ); return; fi;
 			
 			if data[1] = "fv" then ci!.iCofinite := EvalString(data[2]);
 			elif data[1] = "c" then ci!.iCocompact := EvalString(data[2]); 
@@ -65,7 +67,7 @@ InstallMethod( CoxIterCompute,
 		od;
 		CloseStream(ci_stream);
 		
-		ci!.pGrowthSeries := EvalString(fnum)/EvalString(fden);
+		ci!.pGrowthSeries := [EvalString(fnum),EvalString(fden)];
 		
 		# -----------------------------------------
 		# Final
@@ -77,6 +79,7 @@ InstallMethod( Cofinite,
 	[IsCoxIter and IsCoxIterRep], 
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
+		if obj!.bInvariantsComputed = false then return fail; fi;
 		return obj!.iCofinite;
 	end);
 	
@@ -122,9 +125,8 @@ InstallMethod( CreateCoxIterFromCoxeterMatrix,
 		
 		return Objectify( CoxIterType, rec( iCoxeterMatrix := M, bInvariantsComputed := false, iDimension := Dim, iCofinite := -2, iCocompact := -2, rEulerCharacteristic := 0, iFVector := [] ) );
 	end );
-
-ExpandSquareMatrix := function( mat, n, el )
-	local cur_mat_size, i, v;
+ExpandSquareMatrix := function( mat, n )
+	local cur_mat_size, r, c;
 	
 	cur_mat_size := Length(mat);
 	
@@ -132,21 +134,21 @@ ExpandSquareMatrix := function( mat, n, el )
 		return;
 	fi;
 	
-	v := [];
-	for i in [cur_mat_size+1..n] do
-		Append(v,[el]);
+	for r in [1..cur_mat_size] do
+		for c in [(cur_mat_size+1)..n] do
+			mat[r][c] :=  2;
+		od;
 	od;
 	
-	for i in [1..cur_mat_size] do
-		Append(mat[i],v);
-	od;
-	
-	v := [];
-	for i in [1..n] do
-		v[i] := el;
-	od;
-	for i in [cur_mat_size+1..n] do
-		Append(mat,[v]);
+	for r in [(cur_mat_size+1)..n] do
+		mat[r] := [];
+		for c in [1..n] do 
+			if r=c then	
+				mat[r][c] := 1;
+			else 
+				mat[r][c] := 2;
+			fi;
+		od;
 	od;
 end;
 
@@ -154,7 +156,7 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 	"Create `CoxIter' from the Coxeter graph",
 	[ IsList, IsInt ],
 	function( G, Dim )
-		local graph_size, i, j, temp_size, starting_vertex, mat;
+		local graph_size, i, j, temp_size, starting_vertex, vertex, weight, mat;
 		mat := [[1]];
 		
 		if Dim < 0 then
@@ -171,7 +173,7 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 			starting_vertex := G[i][1];
 			
 			if Length(mat) < starting_vertex then
-				ExpandSquareMatrix( mat, starting_vertex, 2 );
+				ExpandSquareMatrix( mat, starting_vertex );
 			fi;
 			
 			for j in [2..temp_size] do
@@ -179,17 +181,20 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 					Error("Ill formed graph");
 				fi;
 				
-				if Length(mat) < G[i][j][1] then
-					ExpandSquareMatrix( mat, G[i][j][1], 2 );
+				vertex := G[i][j][1];
+				
+				if Length(mat) < vertex then
+					ExpandSquareMatrix( mat, vertex );
 				fi;
 				
 				if Length(G[i][j]) > 1 then
-					if mat[starting_vertex][G[i][j][1]] <> 2 and mat[starting_vertex][G[i][j][1]] <> G[i][j][2] then
-						Error("Two different weights for edge(",starting_vertex,",",G[i][j][1],") given");
+					weight := G[i][j][2];
+					if mat[starting_vertex][vertex] <> 2 and mat[starting_vertex][vertex] <> weight then
+						Error("Two different weights for edge(",starting_vertex,",",vertex,") given");
 					fi;
 					
-					mat[starting_vertex][G[i][j][1]] := G[i][j][2];
-					mat[G[i][j][1]][starting_vertex] := G[i][j][2];
+					mat[starting_vertex][vertex] := weight;
+					mat[vertex][starting_vertex] := weight;
 				fi;
 			od;
 		od;
@@ -198,6 +203,7 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 		for i in [1..temp_size] do
 			mat[i][i] := 1;
 		od;
+		
 		return CreateCoxIterFromCoxeterMatrix(mat, Dim);;
 	end );
 

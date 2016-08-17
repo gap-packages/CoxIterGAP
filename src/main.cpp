@@ -121,5 +121,6 @@ int main(int argc, char *argv[])
 	cout << "fden:";
 	for( unsigned int i(0); i < iDenominatorSize; i++ )
 		cout << ( i ? "," : "" ) << iPolynomialDenominator[i];
+	cout << endl;
 	return 0;
 }

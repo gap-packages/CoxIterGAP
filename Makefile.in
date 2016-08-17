@@ -1,8 +1,8 @@
 # sample makefile
 CC = g++
 CXX = g++
-CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -O3 -D_COMPILE_WITHOUT_REGEXP_=1
-LDFLAGS = -L/usr/local/lib -lpcre -lgmp -lgmpxx
+CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -fopenmp -O3 -D_COMPILE_WITHOUT_REGEXP_=1
+LDFLAGS = -L/usr/local/lib -lpcre -lgmp -lgmpxx -fopenmp
 GAPARCH=@GAPARCH@
 BINDIR=bin/@GAPARCH@
 OBJDIR=obj/@GAPARCH@
