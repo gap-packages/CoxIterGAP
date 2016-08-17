@@ -9,9 +9,9 @@
 SetPackageInfo( rec(
 
 PackageName := "CoxIter",
-Subtitle := "Computation of invariants of hyperbolic Coxeter groups",
-Version := "0.1b",
-Date := "08/08/2016", # dd/mm/yyyy format
+Subtitle := "Computations of invariants of hyperbolic Coxeter groups",
+Version := "1.0b",
+Date := "17/08/2016", # dd/mm/yyyy format
 
 Persons := [
   rec(
@@ -83,6 +83,17 @@ AvailabilityTest := function()
     fi;
     return file <> fail;
   end,
+  
+BannerString := Concatenation( 
+    "----------------------------------------------------------------\n",
+    "Loading CoxIter ", ~.Version, "\n",
+    ~.Subtitle, "\n",
+    "by ",
+    JoinStringsWithSeparator( List( Filtered( ~.Persons, r -> r.IsAuthor ),
+                                    r -> Concatenation(
+        r.FirstNames, " ", r.LastName, " (", r.WWWHome, ")\n" ) ), "   " ),
+    "For help, type: ?CoxIter package \n",
+    "----------------------------------------------------------------\n" ),
 
 TestFile := "tst/testall.g",
 
