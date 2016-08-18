@@ -13,5 +13,25 @@ if ! test -e $GAPPATH/sysinfo.gap; then
 fi
 
 . $GAPPATH/sysinfo.gap
-sed -e "s|@GAPARCH@|$GAParch|g" Makefile.in > Makefile
+
+# ----------------------------------
+# GMP
+GAPBINPATH=$GAPPATH/bin/$GAParch
+GAPGMPPATH=$GAPPATH/bin/$GAParch/extern/gmp
+
+GAPCXXFLAGS=""
+GAPLDFLAGS=""
+
+if test -r "$GAPGMPPATH/include/gmp.h"; then
+    GAPCXXFLAGS="$GAP_CPPFLAGS -I$GAPGMPPATH/include"
+    GAPLDFLAGS="$GAPLDFLAGS $GAPGMPPATH/lib/libgmpxx.a $GAPGMPPATH/lib/libgmp.a"
+    echo "GMP found: Using GAP version of GMP"
+else
+	echo "GMP not found: Trying system's GMP"
+	 GAPLDFLAGS="$GAPLDFLAGS -lgmpxx -lgmp"
+fi;
+  
+# ----------------------------------
+# Final stuff
+sed -e "s|@GAPARCH@|$GAParch|g" -e "s|@GAPCXXFLAGS@|$GAPCXXFLAGS|g" -e "s|@GAPLDFLAGS@|$GAPLDFLAGS|g" Makefile.in > Makefile
 echo "Makefile successfully created."

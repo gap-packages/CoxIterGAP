@@ -54,9 +54,13 @@ along with CoxIter. If not, see <http://www.gnu.org/licenses/>.
 #include <cmath>
 #include <unordered_set>
 
+#ifdef _USE_LOCAL_GMP_
+#include "gmpxx.h"
+#else
 #include <gmpxx.h>
+#endif
 
-#ifdef _OPENMP
+#ifdef _COMPILE_WITH_OPENMP_
 #include <omp.h>
 #else
 inline unsigned int omp_get_thread_num() { return 0; }
@@ -212,14 +216,9 @@ class CoxIter
 		bool bRunAllComputations( );
 		
 		/*!	\fn printCoxeterMatrix
-		 * 	\brief Print Coxeter matrix
+		 * 	\brief Print Coxeter matric
 		 */
 		void printCoxeterMatrix( );
-		
-		/*!	\fn printCoxeterGraph
-		 * 	\brief Print Coxeter graph
-		 */
-		void printCoxeterGraph( );
 		
 		/*!	\fn printGramMatrix
 		 * 	\brief Print the Gram matrix
@@ -505,12 +504,6 @@ class CoxIter
 		 * 	\return Gram matrix (string)
 		 */
 		string get_strGramMatrix( ) const;
-		
-		/*!	\fn get_strCoxeterGraph
-		 * 	\brief Returns the Coxeter graph
-		 * 	\return Gram graph (string)
-		 */
-		string get_strCoxeterGraph( ) const;
 		
 		/*!	\fn get_strGramMatrix_GAP
 		 * 	\brief Returns the Gram matrix (format GAP)
