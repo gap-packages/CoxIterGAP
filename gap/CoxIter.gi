@@ -63,6 +63,7 @@ InstallMethod( CoxIterCompute,
 			elif data[1] = "fvector" then ci!.iFVector := EvalString(data[2]);
 			elif data[1] = "fnum" then fnum := Concatenation( "Product( [", data[2], "], i -> CyclotomicPolynomial(Rationals,i) )" );
 			elif data[1] = "fden" then fden := Concatenation( "ValuePol([", data[2], "], X(Rationals))" );
+			elif data[1] = "dimensionguessed" then Print( "Dimension was assumed to be ", data[2] ); 
 			fi;
 		od;
 		CloseStream(ci_stream);
