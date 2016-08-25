@@ -429,8 +429,6 @@ bool CoxIter::bReadGraphFromFile( const string& strInputFilename )
 
 void CoxIter::initializations()
 {
-	size_t i;
-	
 	// ------------------------------------------------------
 	// de initializations
 	if( graphsList_spherical )
@@ -464,9 +462,9 @@ void CoxIter::initializations()
 	// sauvegarde de quelques calculs
 	iFactorials = vector< mpz_class > ( iVerticesCount + 2, 1 );
 	iPowersOf2 = vector< mpz_class > ( iVerticesCount + 2, 1 );
-	for( i = 1; i <= iVerticesCount + 1; i++ )
+	for( unsigned int i(1); i <= iVerticesCount + 1; i++ )
 	{
-		iFactorials[i] = iFactorials[i-1] * i;
+		iFactorials[i] = iFactorials[i-1] * (long int)i;
 		iPowersOf2[i] = mpz_class(2) * iPowersOf2[i-1];
 	}
 }
@@ -2226,7 +2224,7 @@ void CoxIter::growthSeries_sequential()
 	unsigned int iExponent; // Temporary exponent
 	
 	vector< unsigned int > growthSeries_iSymbolNumerator;
-	growthSeries_iPolynomialDenominator = vector< mpz_class >( { 1 } );
+	growthSeries_iPolynomialDenominator = vector< mpz_class >( 1,1 );
 	growthSeries_iCyclotomicNumerator.clear();
 	growthSeries_bFractionReduced = true;
 	
@@ -2368,7 +2366,7 @@ void CoxIter::growthSeries_parallel()
 	// Shared and local variables
 	int iOMPMaxThreads( omp_get_max_threads() );
 	
-	vector< vector< mpz_class > > gs_iPolynomialDenominator( iOMPMaxThreads, vector< mpz_class >( {0} ) );
+	vector< vector< mpz_class > > gs_iPolynomialDenominator( iOMPMaxThreads, vector< mpz_class >( 1,0 ) );
 	vector< vector< unsigned int > > gs_iSymbolNumerator( iOMPMaxThreads, vector< unsigned int >( 0 ) );
 	
 	gs_iPolynomialDenominator[0][0] = 1; // Master thread, empty set --> trivial subgroup
@@ -3295,6 +3293,11 @@ vector< unsigned int > CoxIter::get_iFVector() const
 unsigned int CoxIter::get_iVerticesAtInfinityCount() const
 {
 	return iVerticesAtInfinityCount;
+}
+
+unsigned int CoxIter::get_iIrreducibleSphericalGraphsCount() const
+{
+	return graphsList_spherical->iGraphsCount;
 }
 
 int CoxIter::get_iIsCocompact()
