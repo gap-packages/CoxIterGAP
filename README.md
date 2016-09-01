@@ -5,7 +5,8 @@ Installation
 ---------------------------------
 CoxIter need to be compiled.
 
-If a terminal is open inside your GAP folder, this can be achieved with the following commands (on Linux, OSX):
+If a terminal is opened inside your GAP folder, this can be achieved with the following commands (on Linux, OSX):
+
 	cd pkg/
 	git clone https://github.com/rgugliel/CoxIterGAP
 	cd CoxIterGAP
