@@ -1,6 +1,17 @@
 The GAP 4 package `CoxIter'
 ==============================
 
+Installation
+---------------------------------
+CoxIter need to be compiled.
+
+If a terminal is open inside your GAP folder, this can be achieved with the following commands (on Linux, OSX):
+	cd pkg/
+	git clone https://github.com/rgugliel/CoxIterGAP
+	cd CoxIterGAP
+	./configure PATH_TO_YOUR_GAP
+	make
+
 Giving a hyperbolic Coxeter group
 ---------------------------------
 In order to specify a Coxeter group, one can describe its Coxeter graph: we create a list containing the neighbours of every vertex, together with the weights.
