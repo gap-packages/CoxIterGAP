@@ -22,6 +22,4 @@ DeclareOperation( "CreateCoxIterFromCoxeterGraph", [ IsList, IsInt ] );
 DeclareOperation( "CreateCoxIterFromCoxeterMatrix", [ IsMatrix, IsInt ] );
 DeclareOperation( "CoxIterCompute", [ IsCoxIter ] );
 
-
-DeclareGlobalFunction( "CoxIter_Example" );
-DeclareGlobalFunction( "CoxIter_Compute" );
+DeclareGlobalVariable( "_CoxIter_MAXSIZES", "Maximum: weight for an edge, index for a vertex, dimension" );

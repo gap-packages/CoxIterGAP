@@ -3,6 +3,9 @@
 #
 # Implementations
 #
+
+InstallValue( _CoxIter_MAXSIZES, [ 4294967295, 65535, 65535 ] );
+
 InstallMethod( CoxIterCompute,
 	"Call CoxIter to perform the computations of the invariants",
 	[ IsCoxIter ],
@@ -24,8 +27,6 @@ InstallMethod( CoxIterCompute,
 		WriteLine(ci_stream,"matrix:end");
 		WriteLine(ci_stream,"exit");
 		
-		# TODO: gérer mieux si erreur
-		
 		# -----------------------------------------
 		# Reading information
 		while true do
@@ -36,10 +37,10 @@ InstallMethod( CoxIterCompute,
 			
 			if data[1] = "error" then Error("One error occured: ", data[2] ); return; fi;
 			
-			if data[1] = "fv" then ci!.iCofinite := EvalString(data[2]);
-			elif data[1] = "c" then ci!.iCocompact := EvalString(data[2]); 
-			elif data[1] = "euler" then ci!.rEulerCharacteristic := EvalString(data[2]);
-			elif data[1] = "fvector" then ci!.iFVector := EvalString(data[2]);
+			if data[1] = "fv" then SetCofinite(ci, EvalString(data[2]));
+			elif data[1] = "c" then SetCocompact(ci, EvalString(data[2])); 
+			elif data[1] = "euler" then SetEulerCharacteristic(ci, EvalString(data[2]));
+			elif data[1] = "fvector" then SetFVector(ci, EvalString(data[2]));
 			elif data[1] = "fnum" then fnum := Concatenation( "Product( [", data[2], "], i -> CyclotomicPolynomial(Rationals,i) )" );
 			elif data[1] = "fden" then fden := Concatenation( "ValuePol([", data[2], "], X(Rationals))" );
 			elif data[1] = "dimensionguessed" then Print( "Dimension was assumed to be ", data[2] ); 
@@ -47,7 +48,7 @@ InstallMethod( CoxIterCompute,
 		od;
 		CloseStream(ci_stream);
 		
-		ci!.pGrowthSeries := [EvalString(fnum),EvalString(fden)];
+		SetGrowthSeries(ci, [EvalString(fnum),EvalString(fden)] );
 		
 		# -----------------------------------------
 		# Final
@@ -60,7 +61,10 @@ InstallMethod( Cofinite,
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
 		if obj!.bInvariantsComputed = false then return fail; fi;
-		return obj!.iCofinite;
+		
+		if HasCofinite(obj) then 
+			return Cofinite(obj);
+		fi;
 	end);
 	
 InstallMethod( Cocompact,
@@ -68,7 +72,11 @@ InstallMethod( Cocompact,
 	[IsCoxIter and IsCoxIterRep], 
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
-		return obj!.iCocompact;
+		if obj!.bInvariantsComputed = false then return fail; fi;
+		
+		if HasCocompact(obj) then 
+			return Cocompact(obj);
+		fi;
 	end);
 	
 InstallMethod( FVector,
@@ -76,7 +84,11 @@ InstallMethod( FVector,
 	[IsCoxIter and IsCoxIterRep], 
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
-		return obj!.iFVector;
+		if obj!.bInvariantsComputed = false then return fail; fi;
+		
+		if HasFVector(obj) then 
+			return FVector(obj);
+		fi;
 	end);
 	
 InstallMethod( EulerCharacteristic,
@@ -84,7 +96,12 @@ InstallMethod( EulerCharacteristic,
 	[IsCoxIter and IsCoxIterRep], 
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
+		if obj!.bInvariantsComputed = false then return fail; fi;
 		return obj!.rEulerCharacteristic;
+		
+		if HasEulerCharacteristic(obj) then 
+			return EulerCharacteristic(obj);
+		fi;
 	end);
 	
 InstallMethod( GrowthSeries,
@@ -92,7 +109,11 @@ InstallMethod( GrowthSeries,
 	[IsCoxIter and IsCoxIterRep], 
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
-		return obj!.pGrowthSeries;
+		if obj!.bInvariantsComputed = false then return fail; fi;
+		
+		if HasGrowthSeries(obj) then 
+			return GrowthSeries(obj);
+		fi;
 	end);
 
 InstallMethod( CreateCoxIterFromCoxeterMatrix,
@@ -105,6 +126,7 @@ InstallMethod( CreateCoxIterFromCoxeterMatrix,
 		
 		return Objectify( CoxIterType, rec( iCoxeterMatrix := M, bInvariantsComputed := false, iDimension := Dim, iCofinite := -2, iCocompact := -2, rEulerCharacteristic := 0, iFVector := [] ) );
 	end );
+	
 ExpandSquareMatrix := function( mat, n )
 	local cur_mat_size, r, c;
 	
@@ -139,8 +161,8 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 		local graph_size, i, j, temp_size, starting_vertex, vertex, weight, mat;
 		mat := [[1]];
 		
-		if Dim < 0 then
-			Dim := 0;
+		if IsInt(Dim)=false or Dim<0 or Dim>_CoxIter_MAXSIZES[3] then
+			Error("Dimension must be a non-negative integer smaller than ", _CoxIter_MAXSIZES[3]);
 		fi;
 		
 		graph_size := Length(G);
@@ -151,6 +173,9 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 			fi;
 			
 			starting_vertex := G[i][1];
+			if IsInt(starting_vertex)=false or starting_vertex<=0 or starting_vertex>_CoxIter_MAXSIZES[2] then
+				Error("Incorrect vertex format: ", vertex);
+			fi;
 			
 			if Length(mat) < starting_vertex then
 				ExpandSquareMatrix( mat, starting_vertex );
@@ -163,12 +188,21 @@ InstallMethod( CreateCoxIterFromCoxeterGraph,
 				
 				vertex := G[i][j][1];
 				
+				if IsInt(vertex)=false or vertex<=0 or vertex>_CoxIter_MAXSIZES[2] then
+					Error("Incorrect vertex format: ", vertex);
+				fi;
+				
 				if Length(mat) < vertex then
 					ExpandSquareMatrix( mat, vertex );
 				fi;
 				
 				if Length(G[i][j]) > 1 then
 					weight := G[i][j][2];
+					
+					if IsInt(weight)=false or weight<0 or weight>_CoxIter_MAXSIZES[1] then
+						Error("Weight for edge(",starting_vertex,",",vertex,") is incorrect");
+					fi;
+					
 					if mat[starting_vertex][vertex] <> 2 and mat[starting_vertex][vertex] <> weight then
 						Error("Two different weights for edge(",starting_vertex,",",vertex,") given");
 					fi;
@@ -203,5 +237,10 @@ InstallMethod( PrintObj,
 	"for object in `IsCoxIter'",
 	[ IsCoxIter and IsCoxIterRep ],
 	function( obj )
-		Print( "TODO: printobj" );
+		Print( "CoxIter : Coxeter group with ", Length( obj!.iCoxeterMatrix ) , " generators in dimension " );
+		if obj!.iDimension > 0 then 
+			Print(obj!.iDimension);
+		else 
+			Print("?");
+		fi;
 	end );
