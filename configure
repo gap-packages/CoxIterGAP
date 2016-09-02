@@ -28,7 +28,7 @@ if test -r "$GAPGMPPATH/include/gmp.h"; then
     echo "GMP found: Using GAP version of GMP"
 else
 	echo "GMP not found: Trying system's GMP"
-	 GAPLDFLAGS="$GAPLDFLAGS -lgmpxx -lgmp"
+	GAPLDFLAGS="$GAPLDFLAGS -lgmpxx -lgmp"
 fi;
   
 # ----------------------------------
