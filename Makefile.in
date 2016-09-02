@@ -2,7 +2,7 @@
 CC = g++
 CXX = g++
 CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -O3 -D_COMPILE_WITHOUT_REGEXP_=1 -D_USE_LOCAL_GMP_=1@GAPCXXFLAGS@
-LDFLAGS = -L/usr/local/lib -lpcre@GAPLDFLAGS@
+LDFLAGS = -L/usr/local/lib @GAPLDFLAGS@
 GAPARCH=@GAPARCH@
 BINDIR=bin/@GAPARCH@
 OBJDIR=obj/@GAPARCH@
