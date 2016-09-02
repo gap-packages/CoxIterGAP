@@ -3,27 +3,6 @@
 #
 # Implementations
 #
-InstallGlobalFunction( CoxIter_Example, function()
-	Print( "This is a placeholder function, replace it with your own code.\n" );
-end );
-
-InstallGlobalFunction( CoxIter_Compute, function()
-	local cur_dir, ci_file, ci_stream, ci_output;
-	
-	cur_dir := DirectoryCurrent();
-	ci_file := Filename(DirectoriesPackagePrograms("coxiter"), "coxiter");
-	ci_stream := InputOutputLocalProcess(cur_dir,ci_file,["test"]);
-
-	WriteLine(ci_stream,"The cat sat on the mat");
-	WriteLine(ci_stream,"exit");
-
-	Print(ReadLine(ci_stream));
-	Print(ReadLine(ci_stream));
-	Print(ReadLine(ci_stream));
-	Print(ReadLine(ci_stream));
-	CloseStream(ci_stream);
-end );
-
 InstallMethod( CoxIterCompute,
 	"Call CoxIter to perform the computations of the invariants",
 	[ IsCoxIter ],
