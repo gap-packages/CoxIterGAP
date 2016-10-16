@@ -1,0 +1,22 @@
+<Chapter Label="Introduction">
+<Heading>Introduction</Heading>
+
+<Section Label="section:coxiterprogram">
+	<Heading>The standalone program</Heading>
+	This chapter gives general information about the &GAP; package &CoxIter;. &CoxIter; was first developped as a standalone C++ program whose goal is to compute invariant of hyperbolic Coxeter groups.
+	We consider a hyperbolic Coxeter group <M>\Gamma \leq \textrm{Isom}(\mathbb{H}^n)</M> and the associated polyhedron <M>P</M>.
+	
+	The input of the program consists a file containing the description of the Coxeter graph of <M>\Gamma</M>. Then, the output consists of the following information:
+	<List>
+		<Item>Euler characteristic (and thus volume of <M>P</M> if <M>n</M> is even)</Item>
+		<Item>f-vector <M>(f_0,f_1,\ldots,f_n)</M>: <M>P</M> has <M>f_0</M> vertices, <M>f_1</M> edges, <M>f_2</M> 2-faces, ...</Item>
+		<Item>Cofiniteness test: test whether <M>P</M> has finite volume or not</Item>
+		<Item>Cocompactness test: test whether <M>P</M> is compact or not</Item>
+		<Item>Growh series</Item>
+		<Item>Growth rate and some of its algebraic properties (note: this is not available in the &GAP; package)</Item>
+	</List>
+	
+	A description of the mathematical results behind &CoxIter; can be found in the article <Cite Key="guglielmetti15CoxIter"/>.
+</Section>
+
+</Chapter>

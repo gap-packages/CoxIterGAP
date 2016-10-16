@@ -1,0 +1,30 @@
+  
+  [1X1 [33X[0;0YIntroduction[133X[101X
+  
+  
+  [1X1.1 [33X[0;0YThe standalone program[133X[101X
+  
+  [33X[0;0YThis  chapter  gives  general  information  about  the  [5XGAP[105X package [5XCoxIter[105X.
+  [5XCoxIter[105X  was  first  developped as a standalone C++ program whose goal is to
+  compute  invariant  of  hyperbolic  Coxeter groups. We consider a hyperbolic
+  Coxeter  group  [22XΓ  ≤ Isom(H^n)[122X and the associated polyhedron [22XP[122X. The input of
+  the  program consists a file containing the description of the Coxeter graph
+  of [22XΓ[122X. Then, the output consists of the following information:[133X
+  
+  [30X    [33X[0;6YEuler characteristic (and thus volume of [22XP[122X if [22Xn[122X is even)[133X
+  
+  [30X    [33X[0;6Yf-vector  [22X(f_0,f_1,...,f_n)[122X:  [22XP[122X  has  [22Xf_0[122X  vertices,  [22Xf_1[122X  edges,  [22Xf_2[122X
+        2-faces, ...[133X
+  
+  [30X    [33X[0;6YCofiniteness test: test whether [22XP[122X has finite volume or not[133X
+  
+  [30X    [33X[0;6YCocompactness test: test whether [22XP[122X is compact or not[133X
+  
+  [30X    [33X[0;6YGrowh series[133X
+  
+  [30X    [33X[0;6YGrowth  rate  and  some of its algebraic properties (note: this is not
+        available in the [5XGAP[105X package)[133X
+  
+  [33X[0;0YA description of the mathematical results behind [5XCoxIter[105X can be found in the
+  article [Gug15].[133X
+  

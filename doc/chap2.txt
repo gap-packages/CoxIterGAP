@@ -1,0 +1,28 @@
+  
+  [1X2 [33X[0;0YCoxIter automatic generated documentation[133X[101X
+  
+  
+  [1X2.1 [33X[0;0YCoxIter automatic generated documentation of methods[133X[101X
+  
+  [1X2.1-1 CreateCoxIterFromCoxeterGraph[101X
+  
+  [29X[2XCreateCoxIterFromCoxeterGraph[102X( [3Xgr[103X, [3Xdimension[103X ) [32X operation
+  [6XReturns:[106X  [33X[0;10Ya CoxIter object[133X
+  
+  [33X[0;0YCreates  a CoxIter object from the Coxeter graph [3Xgr[103X. If the dimension [3Xdim[103X is
+  unknown, 0 can be given.[133X
+  
+  [1X2.1-2 CreateCoxIterFromCoxeterMatrix[101X
+  
+  [29X[2XCreateCoxIterFromCoxeterMatrix[102X( [3Xmat[103X, [3Xdimension[103X ) [32X operation
+  [6XReturns:[106X  [33X[0;10Ya CoxIter object[133X
+  
+  [33X[0;0YCreates  a  CoxIter object from the Coxeter matrix [3Xmat[103X. If the dimension [3Xdim[103X
+  is unknown, 0 can be given.[133X
+  
+  [1X2.1-3 CoxIterCompute[101X
+  
+  [29X[2XCoxIterCompute[102X( [3Xci[103X ) [32X operation
+  
+  [33X[0;0YCompute the invariants of the Coxiter object [3Xci[103X[133X
+  

@@ -1,0 +1,25 @@
+#SIXFORMAT  GapDocGAP
+HELPBOOKINFOSIXTMP := rec(
+encoding := "UTF-8",
+bookname := "CoxIter",
+entries :=
+[ [ "Title page", ".", [ 0, 0, 0 ], 1, 1, "title page", "X7D2C85EC87DD46E5" ], 
+  [ "Table of Contents", ".-1", [ 0, 0, 1 ], 27, 2, "table of contents", "X8537FEB07AF2BEC8" ], 
+  [ "\033[1X\033[33X\033[0;-2YIntroduction\033[133X\033[101X", "1", [ 1, 0, 0 ], 1, 3, "introduction", 
+      "X7DFB63A97E67C0A1" ], [ "\033[1X\033[33X\033[0;-2YThe standalone program\033[133X\033[101X", "1.1", 
+      [ 1, 1, 0 ], 4, 3, "the standalone program", "X790516E18477F0F0" ], 
+  [ "\033[1X\033[33X\033[0;-2YCoxIter automatic generated documentation\033[133X\033[101X", "2", [ 2, 0, 0 ], 1, 
+      4, "coxiter automatic generated documentation", "X7BB2E7427B8CD314" ], 
+  [ "\033[1X\033[33X\033[0;-2YCoxIter automatic generated documentation of methods\033[133X\033[101X", "2.1", 
+      [ 2, 1, 0 ], 4, 4, "coxiter automatic generated documentation of methods", "X82A5B4E3797AE9B0" ], 
+  [ "\033[1X\033[33X\033[0;-2YSome examples\033[133X\033[101X", "3", [ 3, 0, 0 ], 1, 5, "some examples", 
+      "X7E52C3EF8039D52A" ], [ "Bibliography", "bib", [ "Bib", 0, 0 ], 1, 6, "bibliography", "X7A6F98FD85F02BFE" ],
+  [ "References", "bib", [ "Bib", 0, 0 ], 1, 6, "references", "X7A6F98FD85F02BFE" ], 
+  [ "Index", "ind", [ "Ind", 0, 0 ], 1, 7, "index", "X83A0356F839C696F" ], 
+  [ "\033[2XCreateCoxIterFromCoxeterGraph\033[102X (for IsList, IsInt)", "2.1-1", [ 2, 1, 1 ], 7, 4, 
+      "createcoxiterfromcoxetergraph for islist isint", "X7A8A7489801735E8" ], 
+  [ "\033[2XCreateCoxIterFromCoxeterMatrix\033[102X (for IsMatrix, IsInt)", "2.1-2", [ 2, 1, 2 ], 15, 4, 
+      "createcoxiterfromcoxetermatrix for ismatrix isint", "X7C89AB0783348959" ], 
+  [ "\033[2XCoxIterCompute\033[102X (for IsCoxIter)", "2.1-3", [ 2, 1, 3 ], 23, 4, "coxitercompute for iscoxiter", 
+      "X8331F2EB85BFFDFD" ] ]
+);

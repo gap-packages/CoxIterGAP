@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This is an automatically generated file. -->
+<Chapter Label="Chapter_Some_groups">
+<Heading>Some groups</Heading>
+
+<Example><![CDATA[
+gap> S3 := SymmetricGroup( 3 );;
+gap> S4 := SymmetricGroup( 4 );;
+]]></Example>
+
+
+</Chapter>
+

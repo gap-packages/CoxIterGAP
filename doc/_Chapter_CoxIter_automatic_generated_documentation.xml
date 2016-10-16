@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- This is an automatically generated file. -->
+<Chapter Label="Chapter_CoxIter_automatic_generated_documentation">
+<Heading>CoxIter automatic generated documentation</Heading>
+
+<Section Label="Chapter_CoxIter_automatic_generated_documentation_Section_CoxIter_automatic_generated_documentation_of_methods">
+<Heading>CoxIter automatic generated documentation of methods</Heading>
+
+<ManSection>
+  <Oper Arg="gr, dimension" Name="CreateCoxIterFromCoxeterGraph" Label="for IsList, IsInt"/>
+ <Returns>a CoxIter object
+</Returns>
+ <Description>
+Creates a CoxIter object from the Coxeter graph <A>gr</A>. If the dimension <A>dim</A> is unknown, 0 can be given.
+ </Description>
+</ManSection>
+
+
+<ManSection>
+  <Oper Arg="mat, dimension" Name="CreateCoxIterFromCoxeterMatrix" Label="for IsMatrix, IsInt"/>
+ <Returns>a CoxIter object
+</Returns>
+ <Description>
+Creates a CoxIter object from the Coxeter matrix <A>mat</A>. If the dimension <A>dim</A> is unknown, 0 can be given.
+ </Description>
+</ManSection>
+
+
+<ManSection>
+  <Oper Arg="ci" Name="CoxIterCompute" Label="for IsCoxIter"/>
+ <Returns></Returns>
+ <Description>
+Compute the invariants of the Coxiter object <A>ci</A>
+ </Description>
+</ManSection>
+
+
+</Section>
+
+
+</Chapter>
+

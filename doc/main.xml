@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Reading PKGVERSIONDATA chunk from the PackageInfo.g file -->
+
+<!DOCTYPE Book SYSTEM "gapdoc.dtd"
+   [ <!ENTITY Example "<Package>Example</Package>">
+     <#Include Label="PKGVERSIONDATA">
+   ]>
+
+<!-- Documentation of the CoxIter package. -->
+
+<Book Name="Example"> 
+
+<TitlePage>
+  <Title>&CoxIter;</Title>
+  <Subtitle>Example/Template of a &GAP; Package and Guidelines for Package Authors</Subtitle>
+  <Version>Version &VERSION;</Version>
+  <Date>&RELEASEDATE;</Date>
+  <Author> Rafael Guglielmetti
+    <Email>rafael.guglielmetti@unifr.ch</Email>
+    <Homepage>http://homeweb.unifr.ch/guglielr/pub/</Homepage>
+  </Author>
+    <Copyright> 
+    <Index>License</Index>
+    &copyright; 2013-2016 by Rafael Guglielmetti<P/>
+    &CoxIter; package is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the
+	License, or (at your option) any later version.
+
+	CoxIter is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License along with CoxIter. If not, see  <URL Text="GPLv3 License">http://www.gnu.org/licenses/</URL>.
+  </Copyright>
+</TitlePage>
+
+<TableOfContents/>
+
+<Body>
+
+<#Include SYSTEM "CoxIter.xml">
+
+</Body>
+
+<TheIndex/>
+
+</Book>
+
+<!-- ==================================================================== -->
+
