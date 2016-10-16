@@ -81,7 +81,6 @@ class CoxIter
 		// -----------------------------------------------------------
 		// I/O
 		bool bWriteInfo; ///< If we want to write informations (false if CoxIter is used "as a plugin")
-		bool bWriteProgress; ///< If we want to display the progress // TODO: option
 		
 		// -----------------------------------------------------------
 		// Redirection cout to a file
@@ -94,6 +93,8 @@ class CoxIter
 		// -----------------------------------------------------------
 		// Graph
 		unsigned int iVerticesCount; ///< Number of vertices
+		unsigned int iMaximalSubgraphRank; ///< Maximal rank of a subgraph
+		
 		unsigned int iDimension; ///< Dimension (or 0)
 		unsigned int iSphericalMaxRankFound; ///< Maximal rank for a spherical graph
 		unsigned int iEuclideanMaxRankFound; ///< Maximal rank for an euclidean graph
@@ -129,6 +130,12 @@ class CoxIter
 		
 		GraphsList *graphsList_spherical; ///< Pointer to the list of spherical graphs
 		GraphsList *graphsList_euclidean; ///< Pointer to the list of euclidean graphs
+		
+		// Computations relative to the infinite sequence
+		unsigned int iISt0; ///< First reflecting hyperplane
+		unsigned int iISs0; /// (ultra)parallel hyperplane, will be conjugate
+		vector< unsigned int > iISFVectorsUnits; ///< Components of the f-vector
+		vector< unsigned int > iISFVectorsPowers; ///< Components of the f-vector
 		
 		// -----------------------------------------------------------
 		// Graphs products
@@ -184,10 +191,10 @@ class CoxIter
 		string growthSeries_raw; ///< Row series, not simplified
 		
 	public:
-		/*! \fn CoxIter( )
+		/*! \fn CoxIter()
 		 * 	\brief Default constructor. Initialize the default values.
 		 */
-		CoxIter( );
+		CoxIter();
 		
 		/*! \fn CoxIter( const vector< vector<unsigned int> >& iMatrix, const unsigned int& iDimension )
 		 * 	\brief Constructor
@@ -198,52 +205,52 @@ class CoxIter
 		*/
 		CoxIter( const vector< vector<unsigned int> >& iMatrix, const unsigned int& iDimension );
 		
-		~CoxIter( );
+		~CoxIter();
 		
 		/*!	\fn bRunAllComputations
 		 * 	\brief Do all the computations
 		 * 
 		 * 	Call the followings functions:<br />
-		 * 		readGraph( )<br />
-				exploreGraph( )<br />
-				computeGraphsProducts( )<br />
-				euler( )<br />
-				isFiniteCovolume( )<br />
-				iIsGraphCocompact( )<br />
+		 * 		readGraph()<br />
+				exploreGraph()<br />
+				computeGraphsProducts()<br />
+				euler()<br />
+				isFiniteCovolume()<br />
+				iIsGraphCocompact()<br />
 				
 			\return True if success
 		 */
-		bool bRunAllComputations( );
+		bool bRunAllComputations();
 		
 		/*!	\fn printCoxeterMatrix
 		 * 	\brief Print Coxeter matrix
 		 */
-		void printCoxeterMatrix( );
+		void printCoxeterMatrix();
 		
 		/*!	\fn printCoxeterGraph
 		 * 	\brief Print Coxeter graph
 		 */
-		void printCoxeterGraph( );
+		void printCoxeterGraph();
 		
 		/*!	\fn printGramMatrix
 		 * 	\brief Print the Gram matrix
 		 */
-		void printGramMatrix( );
+		void printGramMatrix();
 		
 		/*!	\fn printGramMatrix_GAP
 		 * 	\brief Print the Gram matrix (format: GAP)
 		 */
-		void printGramMatrix_GAP( );
+		void printGramMatrix_GAP();
 		
 		/*!	\fn printGramMatrix_Mathematica
 		 * 	\brief Print the Gram matrix (format: Mathematica)
 		 */
-		void printGramMatrix_Mathematica( );
+		void printGramMatrix_Mathematica();
 		
 		/*!	\fn printGramMatrix_PARI
 		 * 	\brief Print the Gram matrix (format: PARI)
 		 */
-		void printGramMatrix_PARI( );
+		void printGramMatrix_PARI();
 		
 		/*!	\fn printGramMatrix_LaTeX
 		 * 	\brief Print the Gram matrix (format: LaTeX)
@@ -253,7 +260,7 @@ class CoxIter
 		/*!	\fn printEdgesVisitedMatrix
 		 * 	\brief Display the visited edges
 		 */
-		void printEdgesVisitedMatrix( );
+		void printEdgesVisitedMatrix();
 
 		/*! \fn bReadGraphFromFile
 		 * 	\brief Read the graph from a file
@@ -299,6 +306,16 @@ class CoxIter
 		 * 	First, we find all the chains startings from every vertex. Then, we wxpand the chains to spherical and euclidean graphs
 		 */
 		void exploreGraph();
+		
+		/*!
+		 * 	\fn IS_computations
+		 * 	\brief Do some computations related to the infinite sequence
+		 * 	Remark: It is suppose that both t0, s0 are admissible vertices whose corresponding hyperplanes are (ultra)parallel
+		 * 
+		 * \param t0( const string& ) t0 Reflecting hyperplane
+		 * \param t0( const string& ) s0 Other hyperplane
+		 */
+		void IS_computations( const string& t0, const string& s0 );
 
 		/*!	\fn bEulerCharacteristicFVector
 		 * 	\brief Conmpute the euler characteristic and f-vector
@@ -318,14 +335,14 @@ class CoxIter
 		 * 	Remark: If the programm was not called with the -compacity flag, the function does nothing
 		 * 	\return Value of iIsCocompact
 		 */
-		int iIsGraphCocompact( );
+		int iIsGraphCocompact();
 		
 		/*!	\fn isFiniteCovolume
 		 * 	\brief Check whether the graph is of finite covolume or not
 		 * 	Remark: If the programm was not called with the -fv flag, the function does nothing
 		 * 	\return Value of iIsFiniteCovolume
 		 */
-		int isFiniteCovolume( );
+		int isFiniteCovolume();
 		
 		/*!	\fn bCanBeFiniteCovolume
 		 * 	\brief Check whether the group can be of finite covolume or no
@@ -333,25 +350,25 @@ class CoxIter
 		 * 	We also suppose that this function is called alone most of the time (i.e. that we won't call bCheckFiniteCovolume after that, most of the time).
 		 * 	\return True is the group can be of finite covolume, false if the group is of infinite covolume
 		 */
-		bool bCanBeFiniteCovolume( );
+		bool bCanBeFiniteCovolume();
 		
 		/*!	\fn bCanBeFiniteCovolume_complete
 		 * 	\brief Check whether the group can be of finite covolume or no
 		 * 	\return The list of affine graphs which cannot be extended to an affine graph of rank n-1. If the list is empty, then it is possible that the group has finite covolume.
 		 */
-		vector< vector<short unsigned int> > bCanBeFiniteCovolume_complete( );
+		vector< vector<short unsigned int> > bCanBeFiniteCovolume_complete();
 
 		/*!
 		 * \fn computeGraphsProducts
 		 * \brief Compute the possible products of the irreducible graphs
 		 */
-		void computeGraphsProducts( );
+		void computeGraphsProducts();
 		
 		/*!
 		 * \fn printGrowthSeries
 		 * \brief Display the growth series
 		 */
-		void printGrowthSeries( );
+		void printGrowthSeries();
 		
 		/*! \fn printEuclideanGraphsProducts
 		 * 	\brief Display the euclidean graph products found
@@ -386,48 +403,60 @@ class CoxIter
 		 * 
 		 * \return Code d'erreur (string)
 		 */
-		string get_strError( ) const;
+		string get_strError() const;
 		
 		/*! \fn get_brEulerCaracteristic
 		 * \brief return brEulerCaracteristic
 		 * 
 		 * \return brEulerCaracteristic (MPZ_rational)
 		 */
-		MPZ_rational get_brEulerCaracteristic( ) const;
+		MPZ_rational get_brEulerCaracteristic() const;
 		
 		/*! \fn get_strEulerCaracteristic
 		 * \brief return brEulerCaracteristic
 		 * 
 		 * \return Euler characteristic (string)
 		 */
-		string get_strEulerCaracteristic( ) const;
+		string get_strEulerCaracteristic() const;
 		
 		/*! \fn get_strEulerCharacteristic_computations
 		 * \brief Return the computations needed to determine Euler's characteristic
 		 * 
 		 * \return strEulerCharacteristic_computations (string)
 		 */
-		string get_strEulerCharacteristic_computations( ) const;
+		string get_strEulerCharacteristic_computations() const;
 		
 		/*! \fn get_iFVectorAlternateSum
 		 * 	\brief Return the alternating sum of the componenents of the f-vector
 		 * 	\return Alternating sum of the componenents of the f-vector (int)
 		 */
-		int get_iFVectorAlternateSum( ) const;
+		int get_iFVectorAlternateSum() const;
 		
 		/*! \fn get_iFVector
 		 * 	\brief Return the f-vector
 		 * 	\return f-vector
 		 */
-		vector< unsigned int> get_iFVector( ) const;
+		vector< unsigned int> get_iFVector() const;
+		
+		/*! \fn get_iISFVectorsUnits
+		 * 	\brief Return the units of the f-vector after n-doubling
+		 * 	\return Units
+		 */
+		vector< unsigned int > get_iISFVectorsUnits() const;
+		
+		/*! \fn get_iISFVectorsUnits
+		 * 	\brief Return the powers of 2^{n-1} of the f-vector after n-doubling
+		 * 	\return Units
+		 */
+		vector< unsigned int > get_iISFVectorsPowers() const;
 		
 		/*! \fn get_iVerticesAtInfinityCount
 		 * 	\brief Return the number of vertices at infinity
 		 * 	\return Return the number of vertices at infinity
 		 */
-		unsigned int get_iVerticesAtInfinityCount( ) const;
+		unsigned int get_iVerticesAtInfinityCount() const;
 		
-		/*! \fn get_iSphericalGraphsCount
+		/*! \fn get_iIrreducibleSphericalGraphsCount
 		 * 	\brief Return the number of irreducible spherical graphs
 		 * 	\return Return the number of irreducible spherical graphs
 		 */
@@ -438,56 +467,63 @@ class CoxIter
 		 * 	\brief Return bWriteInfo
 		 * 	\return bWriteInfo
 		 */
-		bool get_bWriteInfo( ) const;
+		bool get_bWriteInfo() const;
 		
 		/*!
 		 * 	\fn get_bDebug
 		 * 	\brief Return get_bDebug
 		 * 	\return get_bDebug
 		 */
-		bool get_bDebug( ) const;
+		bool get_bDebug() const;
 		
 		/*!
 		 * 	\fn get_iDimension
 		 * 	\brief Return the dimension
 		 * 	\return Dimension (0 if not specified/guessed)
 		 */
-		unsigned int get_iDimension( ) const;
+		unsigned int get_iDimension() const;
 		
 		/*!
 		 * 	\fn get_bDimensionGuessed
 		 * 	\brief Return true if the dimension was guessed
 		 * 	\return True if the dimension was guessed
 		 */
-		bool get_bDimensionGuessed( ) const;
+		bool get_bDimensionGuessed() const;
 		
 		/*!
 		 * 	\fn get_iIsCocompact
 		 * 	\brief Return the value of iIsCompact
 		 * 	\return 1 if cocompact, 0 if not, -1 if not tested
 		 */
-		int get_iIsCocompact( );
+		int get_iIsCocompact();
 		
 		/*!
 		 * 	\fn get_iIsFiniteCovolume
 		 * 	\brief Return the value of iIsFiniteCovolume
 		 * 	\return 1 if finite covolume, 0 if not, -1 if not tested
 		 */
-		int get_iIsFiniteCovolume( );
+		int get_iIsFiniteCovolume();
 		
 		/*!
 		 * 	\fn get_iIsArithmetic
 		 * 	\brief Arithmetic?
 		 * 	\return 1 if arithmetic, 0 if not, -1 if not known
 		 */
-		int get_iIsArithmetic( ) const;
+		int get_iIsArithmetic() const;
 		
 		/*!
 		 * 	\fn get_iCoxeterMatrix
 		 * 	\brief Return the Coxeter matrix
 		 * 	\return Coxeter matrix
 		 */
-		vector< vector<unsigned int> > get_iCoxeterMatrix( ) const;
+		vector< vector<unsigned int> > get_iCoxeterMatrix() const;
+		
+		/*!
+		 * 	\fn get_iCoxeterMatrixEntry
+		 * 	\brief Return the one entry of the Coxeter matrix
+		 * 	\return Entry
+		 */
+		unsigned int get_iCoxeterMatrixEntry( const unsigned int& i, const unsigned int& j ) const;
 		
 		/*!
 		 * 	\fn get_iCoxeterMatrix
@@ -501,68 +537,68 @@ class CoxIter
 		 * 	\brief Return the Coxeter matrix
 		 * 	\return Coxeter matrix (string)
 		 */
-		string get_strCoxeterMatrix( ) const;
+		string get_strCoxeterMatrix() const;
 		
 		/*!
 		 * 	\fn get_array_str_2_GramMatrix
 		 * 	\brief Return the entries of 2*G (string)
 		 * 	\return Entries of 2*G
 		 */
-		vector< vector< string > > get_array_str_2_GramMatrix( ) const;
+		vector< vector< string > > get_array_str_2_GramMatrix() const;
 		
 		/*!	\fn get_strGramMatrix
 		 * 	\brief Returns the Gram matrix
 		 * 	\return Gram matrix (string)
 		 */
-		string get_strGramMatrix( ) const;
+		string get_strGramMatrix() const;
 		
 		/*!	\fn get_strCoxeterGraph
 		 * 	\brief Returns the Coxeter graph
 		 * 	\return Gram graph (string)
 		 */
-		string get_strCoxeterGraph( ) const;
+		string get_strCoxeterGraph() const;
 		
 		/*!	\fn get_strGramMatrix_GAP
 		 * 	\brief Returns the Gram matrix (format GAP)
 		 * 	\return Gram matrix (string)
 		 */
-		string get_strGramMatrix_GAP( ) const;
+		string get_strGramMatrix_GAP() const;
 		
 		/*!	\fn get_strGramMatrix_LaTeX
 		 * 	\brief Returns the Gram matrix (format LaTeX)
 		 * 	\return Gram matrix (string)
 		 */
-		string get_strGramMatrix_LaTeX( ) const;
+		string get_strGramMatrix_LaTeX() const;
 		
 		/*!	\fn get_strGramMatrix_Mathematica
 		 * 	\brief Returns the Gram matrix (format Mathematica)
 		 * 	\return Gram matrix (string)
 		 */
-		string get_strGramMatrix_Mathematica( ) const;
+		string get_strGramMatrix_Mathematica() const;
 		
 		/*!	\fn get_strGramMatrix_PARI
 		 * 	\brief Returns the Gram matrix (format PARI)
 		 * 	\return Gram matrix (string)
 		 */
-		string get_strGramMatrix_PARI( ) const;
+		string get_strGramMatrix_PARI() const;
 		
 		/*!	\fn get_strGramMatrixField
 		 * 	\brief Field generated by the entries of the Gram matrix (string)
 		 * 	\return Field generated by the entries of the Gram matrix (string)
 		 */
-		string get_strGramMatrixField( ) const;
+		string get_strGramMatrixField() const;
 		
 		/*!	\fn get_iVerticesCount
 		 * 	\brief Retourne le nombre de sommets du graphe
 		 * 	\return Retourne le nombre de sommets du graphe (int)
 		 */
-		unsigned int get_iVerticesCount( ) const;
+		unsigned int get_iVerticesCount() const;
 		
 		/*!	\fn get_bHasDottedLine
 		 * 	\brief Does the graph have at least one dotted edge?
 		 * 	\return Yes if the graph has at least one dotted edge
 		 */
-		bool get_bHasDottedLine( ) const;
+		bool get_bHasDottedLine() const;
 		
 		/*!	\fn get_iHasDottedLineWithoutWeight
 		 * 	\brief Does the graph have dotted edges without weights?
@@ -571,10 +607,10 @@ class CoxIter
 		int get_iHasDottedLineWithoutWeight() const;
 		
 		/*!	\fn get_str_map_vertices_indexToLabel
-		 * 	\brief Return the label of a vertex (specified by its index)
-		 * 	\return The label of a vertex (specified by its index)
+		 * 	\brief Return the label of the vertices
+		 * 	\return The labels of the vertices
 		 */
-		string get_str_map_vertices_indexToLabel( const size_t& ) const;
+		vector< string > get_str_map_vertices_indexToLabel() const;
 		
 		/*!
 		 * 	\fn set_iIsArithmetic
@@ -607,9 +643,9 @@ class CoxIter
 		 */
 		void set_iDimension( const unsigned int& iDimension_ ); 
 		
-		GraphsList* get_gl_graphsList_spherical( ) const;
+		GraphsList* get_gl_graphsList_spherical() const;
 		
-		GraphsList* get_gl_graphsList_euclidean( ) const;
+		GraphsList* get_gl_graphsList_euclidean() const;
 		
 		bool get_b_hasSphericalGraphsOfRank( const unsigned int& iRank ) const;
 		
@@ -631,9 +667,9 @@ class CoxIter
 		 * 	
 		 * 	\return True if the fraction is reduced
 		 */
-		bool get_bGrowthSeriesReduced( );
+		bool get_bGrowthSeriesReduced();
 		
-		vector< mpz_class > get_iGrowthSeries_denominator( );
+		vector< mpz_class > get_iGrowthSeries_denominator();
 		
 		string get_strGrowthSeries();
 		string get_strGrowthSeries_raw();
@@ -643,9 +679,8 @@ class CoxIter
 		 * 	\brief Return the list of graphs products
 		 * 	Remark: there is absolutely no verification
 		 */
-		const vector< vector< GraphsProductSet > >* get_ptr_graphsProducts( ) const;
+		const vector< vector< GraphsProductSet > >* get_ptr_graphsProducts() const;
 		  
-		
 		/*!
 		 * 	\fn set_iCoxeterMatrix
 		 * 	\brief Set the Coxeter matrix
@@ -673,7 +708,7 @@ class CoxIter
 		 * 	\fn map_vertices_labels_create
 		 * 	\brief Create labels if there is none (int --> string)
 		 */
-		void map_vertices_labels_create( );
+		void map_vertices_labels_create();
 		
 		/*!
 		 * 	\fn map_vertices_labels_reinitialize
@@ -685,9 +720,9 @@ class CoxIter
 		CoxIter( const CoxIter& ); ///< We do not want to do this
 		
 		/*! 	\fn initializations
-		 * 	\brief Une fois le nombre de sommets du graphe connu (via inputRead( ) ), fait divers initialisations de variables
+		 * 	\brief Une fois le nombre de sommets du graphe connu (via inputRead() ), fait divers initialisations de variables
 		 */
-		void initializations( );
+		void initializations();
 		
 		/*! \fn DFS
 		 * \brief Look for all the An starting from a given vertex
@@ -702,14 +737,14 @@ class CoxIter
 		/*! 	\fn printPath
 		 * 	\brief Print the iPath vector
 		 */
-		void printPath( );
+		void printPath();
 		
 		/*!	\fn addGraphsFromPath
 		 * 	\brief Find the different type of graphs (An, Bn, Dn, En, Hn, F4) from any An
 		 * 
 		 * 	Based on the content of iPath
 		 */
-		void addGraphsFromPath( );
+		void addGraphsFromPath();
 		
 		/*!
 		 * \fn AnToEn_AnToTEn( const vector<short unsigned int>& iPathTemp, const vector< bool >& bVerticesLinkable )
@@ -751,6 +786,16 @@ class CoxIter
 		 * 	\param bGPVerticesNonLinkable( vector< bool >& ) Vertices which cannot be linked to the current product
 		 */
 		void computeGraphsProducts( GraphsListIterator grIt, vector< map<vector< vector<short unsigned int> >, unsigned int> >* graphsProductsCount, const bool& bSpherical, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable );
+		
+		/*!	\fn computeGraphsProducts_IS( GraphsListIterator grIt, vector< map<vector< vector<short unsigned int> >, unsigned int> >* graphsProductsCount, const bool& bSpherical, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable )
+		 * 	\brief Compute the FVector for the infinite sequence
+		 * 
+		 * 	\param grIt( GraphsListIterator ): Iterator on the list
+		 * 	\param bSpherical( const bool& ): True if spherical, false if euclidean
+		 * 	\param gp( GraphsProduct& ) To store the product (for the cocompacity and finite covolume tests)
+		 * 	\param bGPVerticesNonLinkable( vector< bool >& ) Vertices which cannot be linked to the current product
+		 */
+		void computeGraphsProducts_IS( GraphsListIterator grIt, const bool& bSpherical, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable );
 		
 		void bCanBeFiniteCovolume_computeGraphsProducts( GraphsListIterator grIt, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable );
 		void bCanBeFiniteCovolume_complete_computeGraphsProducts( GraphsListIterator grIt, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable );

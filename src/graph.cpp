@@ -53,6 +53,16 @@ ostream& operator<<( ostream &o, const Graph &g )
 	if( g.iDataSupp && g.bSpherical )
 		o << " (" << g.iDataSupp << ")";
 	
+	// Extended debbuging info
+	/*
+	o << "N={";
+	for( i = 0; i < g.bVerticesLinkable.size(); i++ )
+	{
+		if( !g.bVerticesLinkable[i] )
+			o << ( i + 1 ) << ",";
+	}
+	o << "}";*/
+	
 	o << endl;
 	
 	return o;
@@ -368,6 +378,10 @@ bool Graph::bIsSubgraphOf_spherical_euclidean( const Graph* grBig ) const
 	if( iGraphType == 3 && grBig->iGraphType == 1 )
 	{
 		if( iVerticesBigCount < 5 )
+			return false;
+			
+		// "central" node
+		if( iVertices[iVerticesCount - 3] != grBig->iVertices[iVerticesBigCount - 3] )
 			return false;
 		
 		Graph g( vector<short unsigned int>( grBig->iVertices.begin( ) + 1, grBig->iVertices.end( ) ), 0, vector< bool >( false ), 3, true, 0 );
@@ -753,7 +767,11 @@ bool Graph::bIsSubgraphOf_spherical_spherical( const Graph* grBig ) const
 	if( iGraphType == 3 && grBig->iGraphType == 3 )
 	{
 		if( iVerticesCount == 4 ) // D_4 est très symétrique
-		{	
+		{
+			// central node
+			if( iVertices[1] != grBig->iVertices[iVerticesBigCount - 3] )
+				return false;
+			
 			vector<short unsigned int> iVTemp1;
 			iVTemp1.push_back( iVertices[0] );
 			iVTemp1.push_back( iVertices[2] );

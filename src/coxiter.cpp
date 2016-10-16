@@ -33,13 +33,12 @@ CoxIter::CoxIter()
 	bHasDottedLine( false ),
 	iHasDottedLineWithoutWeight( 0 ),
 	bWriteInfo( false ),
-	bWriteProgress( false ),
 	bGraphExplored( false ),
 	bGraphsProductsComputed( false ),
 	bUseOpenMP( true ),
 	brEulerCaracteristic( 0 ),
-	graphsList_spherical( 0 ),
-	graphsList_euclidean( 0 ),
+	graphsList_spherical( nullptr ),
+	graphsList_euclidean( nullptr ),
 	iDimension( 0 ),
 	iEuclideanMaxRankFound( 0 ),
 	iSphericalMaxRankFound( 0 ),
@@ -71,12 +70,11 @@ CoxIter::CoxIter( const vector< vector< unsigned int > >& iMatrix, const unsigne
 	bHasDottedLine( false ),
 	iHasDottedLineWithoutWeight( 0 ),
 	bWriteInfo( false ), 
-	bWriteProgress( false ),
 	bDebug( false ),
 	bUseOpenMP( true ),
 	brEulerCaracteristic( 0 ),
-	graphsList_spherical( 0 ),
-	graphsList_euclidean( 0 ),
+	graphsList_spherical( nullptr ),
+	graphsList_euclidean( nullptr ),
 	iDimension( iDimension ),
 	iEuclideanMaxRankFound( 0 ),
 	iSphericalMaxRankFound( 0 ),
@@ -97,6 +95,8 @@ CoxIter::CoxIter( const vector< vector< unsigned int > >& iMatrix, const unsigne
 	
 	iCoxeterMatrix = iMatrix;
 	
+	iMaximalSubgraphRank = iDimension ? iDimension : iVerticesCount;
+	
 	#ifndef _OPENMP
 	this->bUseOpenMP = false;
 	#endif
@@ -106,10 +106,10 @@ CoxIter::~CoxIter()
 {
 	if( graphsList_spherical )
 		delete graphsList_spherical;
-	
+		
 	if( graphsList_euclidean )
 		delete graphsList_euclidean;
-	
+		
 	// if cout is redirected to a file
 	if( bCoutFile )
 	{
@@ -356,6 +356,8 @@ bool CoxIter::parseGraph( istream& streamIn )
 		}
 	}
 	
+	iMaximalSubgraphRank = iDimension ? iDimension : iVerticesCount;
+	
 	// ---------------------------------------------------------------------------
 	// some information
 	if( bWriteInfo )
@@ -578,10 +580,6 @@ bool CoxIter::bWriteGraphToDraw( const string& strOutFilenameBasis )
 	out << "}";
 	out.close();
 	
-	// indique la commande GraphViz (l'image générée aide à vérifier que le graphe a été correctement encodé)
-	if( bWriteInfo )
-		cout << "GraphViz command: \n\t" <<  "dot -Tjpg -o\"" << strOutFilenameBasis << ".jpg\" \"" << strFilename << "\"\n" <<  endl;
-	
 	return true;
 }
 
@@ -600,9 +598,6 @@ void CoxIter::exploreGraph()
 	// pour chaque sommet, on cherche toutes les chaînes qui partent, ce qui donne les An, Bn, Dn, En, Hn
 	iPath.clear();
 	
-	if( bWriteProgress )
-		cout << "\tFirst part of spherical graphs" << endl;
-	
 	for( i = 0; i < iVerticesCount; i++ )
 	{
 		iPath.clear();
@@ -610,18 +605,10 @@ void CoxIter::exploreGraph()
 		bEdgesVisited = vector< vector<bool> >(iVerticesCount, vector<bool>( iVerticesCount, false ) );
 		
 		DFS( i, i );
-		
-		if( bWriteProgress && i && !( i % 10 ) )
-			cout << "\t\t" << ( 100 * i / iVerticesCount ) << "%" << endl;
 	}
-	if( bWriteProgress )
-		cout << "\n\tFinished" << endl;
 	
 	// -------------------------------------------------------------------
 	// recherche des A_1, G_2^k avec k >= 4, F_4
-	if( bWriteProgress )
-		cout << "\tSecond part of spherical graphs" << endl;
-	
 	vector<bool> bVerticesLinkable, bVerticesLinkableTemp;
 	for( i = 0; i < iVerticesCount; i++ )
 	{
@@ -685,12 +672,7 @@ void CoxIter::exploreGraph()
 				}
 			}
 		}
-		
-		if( bWriteProgress && i && !( i % 10 ) )
-			cout << "\t\t" << ( 100 * i / iVerticesCount ) << "%" << endl;
 	}
-	if( bWriteProgress )
-		cout << "\n\tFinished" << endl;
 	
 	bGraphExplored = true;
 }
@@ -945,6 +927,8 @@ void CoxIter::addGraphsFromPath()
 					else
 						graphsList_euclidean->addGraph( iPathTemp, bVerticesLinkableTemp, 6, false, j, 0, 1 );
 					
+					auto bVerticesLinkableTemp_bck( bVerticesLinkableTemp ); // Contains info for: iPathTemp + j
+					
 					// ------------------------------------------
 					// on va tenter de prolonger cela en un TCn, n \geq 3
 					if( iCoxeterMatrix[ iPath[i] ][j] == 4 )
@@ -953,6 +937,7 @@ void CoxIter::addGraphsFromPath()
 						{
 							if( iCoxeterMatrix[k][ iPathTemp[0] ] == 4 && k != j && bVerticesLinkable_1_n[k] && iCoxeterMatrix[k][j] == 2 )
 							{
+								// Additional info for vertex k 
 								for( l = 0; l < iVerticesCount; l++ )
 								{
 									if( iCoxeterMatrix[k][l] != 2 )
@@ -960,6 +945,8 @@ void CoxIter::addGraphsFromPath()
 								}
 								
 								graphsList_euclidean->addGraph( iPathTemp, bVerticesLinkableTemp, 2, false, k, j );
+								
+								bVerticesLinkableTemp = bVerticesLinkableTemp_bck; // Restoring to info of iPathTemp and j
 							}
 						}
 					}
@@ -1591,9 +1578,6 @@ void CoxIter::computeGraphsProducts()
 		}
 	}
 	
-	if( bWriteProgress )
-		cout << "\tFinished" << endl;
-	
 	// --------------------------------------------------------------
 	// produits de graphes euclidiens
 	if( bDebug )
@@ -1654,11 +1638,9 @@ void CoxIter::computeGraphsProducts( GraphsListIterator grIt, vector< map<vector
 	vector< short unsigned int >::iterator iIt;
 	vector< short unsigned int > iVerticesFlagged;
 	unsigned int iGraphRank(0);
-	static unsigned int iMaxRank( iDimension ? iDimension : iVerticesCount );
-	
 	vector< vector< short unsigned int > > vFootPrintTest;
 	
-	while( grIt.ptr && ( gp.iRank + iGraphRank <= iMaxRank ) )
+	while( grIt.ptr && ( gp.iRank + iGraphRank <= iMaximalSubgraphRank ) )
 	{
 		// ---------------------------------------------------
 		// est ce que le graphe est admissible?
@@ -1755,6 +1737,177 @@ void CoxIter::computeGraphsProducts( GraphsListIterator grIt, vector< map<vector
 			
 			// récursion
 			computeGraphsProducts( ++grIt, graphsProductsCount, bSpherical, gp, bGPVerticesNonLinkable );
+			
+			// -----------------------------------------------
+			// dé-initialisations
+			
+			// on remet la liste à son état d'avant la récursion	
+			for( iIt = iVerticesFlagged.begin(); iIt != iVerticesFlagged.end(); ++ iIt )
+				bGPVerticesNonLinkable[ *iIt ] = false;
+			
+			gp.iRank -= iGraphRank;
+			
+			// le graphe est enlevé
+			gp.graphs.pop_back();
+			
+			if( !gp.graphs.size() )
+				break;
+		}
+		else
+			++grIt;
+	}
+}
+
+void CoxIter::IS_computations( const string& t0, const string& s0 )
+{
+	iISt0 = get_iVertexIndex( t0 );
+	iISs0 = get_iVertexIndex( s0 );
+	
+	iISFVectorsUnits = vector< unsigned int >( iDimension, 0 );
+	iISFVectorsPowers = vector< unsigned int >( iDimension, 0 );
+	
+	if( !iCoxeterMatrix.size() )
+		return;
+	
+	if( !bGraphExplored )
+		exploreGraph();
+	
+	if( !bGraphsProductsComputed )
+		computeGraphsProducts();
+		
+	vector< bool > bGPVerticesNonLinkable( vector< bool >( iVerticesCount, false ) );
+	GraphsProduct gp; ///< Current graphs product
+	
+	// --------------------------------------------------------------
+	// produits de graphes sphériques
+	GraphsListIterator grIt_spherical( this->graphsList_spherical );
+	
+	#pragma omp parallel if( bUseOpenMP && iVerticesCount >= 15 )
+	{
+		#pragma omp single nowait
+		while( grIt_spherical.ptr )
+		{
+			#pragma omp task firstprivate(grIt_spherical, bGPVerticesNonLinkable, gp)
+			{
+				computeGraphsProducts_IS( grIt_spherical, true, gp, bGPVerticesNonLinkable );
+			}
+			
+			++grIt_spherical;
+		}
+	}
+	
+	// --------------------------------------------------------------
+	// produits de graphes euclidiens
+	GraphsListIterator grIt_euclidean( this->graphsList_euclidean );
+	#pragma omp parallel if( bUseOpenMP && iVerticesCount >= 15 )
+	{
+		#pragma omp single nowait
+		while( grIt_euclidean.ptr )
+		{
+			#pragma omp task firstprivate(grIt_euclidean, bGPVerticesNonLinkable, gp)
+			{
+				computeGraphsProducts_IS( grIt_euclidean, false, gp, bGPVerticesNonLinkable );
+			}
+			
+			++grIt_euclidean;
+		}
+	}
+}
+
+void CoxIter::computeGraphsProducts_IS( GraphsListIterator grIt, const bool& bSpherical, GraphsProduct& gp, vector< bool >& bGPVerticesNonLinkable )
+{
+	vector< short unsigned int >::iterator iIt;
+	vector< short unsigned int > iVerticesFlagged;
+	unsigned int iGraphRank(0);
+	
+	while( grIt.ptr && ( gp.iRank + iGraphRank <= iMaximalSubgraphRank ) )
+	{
+		// ---------------------------------------------------
+		// est ce que le graphe est admissible?
+		for( iIt = grIt.ptr->iVertices.begin(); iIt != grIt.ptr->iVertices.end(); ++iIt )
+		{
+			if( bGPVerticesNonLinkable[ *iIt ] ) // si pas linkable
+				break;
+		}
+		
+		// si le graphe est admissible
+		if( iIt == grIt.ptr->iVertices.end() )
+		{
+			// le graphe est ajouté au produit
+			gp.graphs.push_back( grIt.ptr );
+
+			// taille du graphe courant
+			iGraphRank = bSpherical ? grIt.ptr->iVertices.size() : ( grIt.ptr->iVertices.size() - 1 );
+			gp.iRank += iGraphRank;
+			
+			#pragma omp critical
+			{
+				if( bSpherical || gp.iRank == ( iDimension - 1 ) )
+				{
+					bool bSpecialIn_t0( false ), bSpecialIn_s0( false );
+					unsigned int iNonCommute_t0(0), iNonCommute_s0(0);
+					for( auto g : gp.graphs )
+					{
+						for( auto v : g->iVertices )
+						{
+							if( v == iISt0 )
+								bSpecialIn_t0 = true;
+							else if( iCoxeterMatrix[v][iISt0] != 2 )
+								iNonCommute_t0++;
+								
+							if( v == iISs0 )
+								bSpecialIn_s0 = true;
+							else if( iCoxeterMatrix[v][iISs0] != 2 )
+								iNonCommute_s0++;	
+						}
+					}
+					
+					if( !bSpecialIn_t0 && !bSpecialIn_s0 )
+					{
+						if( !iNonCommute_t0 && !iNonCommute_s0 )
+							iISFVectorsUnits[bSpherical ? iDimension - gp.iRank : 0]++;
+						else if( iNonCommute_t0 && iNonCommute_s0 )
+							iISFVectorsPowers[bSpherical ? iDimension - gp.iRank : 0] += 2;
+						else if( iNonCommute_t0 && !iNonCommute_s0 )
+						{
+							iISFVectorsUnits[bSpherical ? iDimension - gp.iRank : 0]++;
+							iISFVectorsPowers[bSpherical ? iDimension - gp.iRank : 0]++;
+						}
+						else
+							iISFVectorsPowers[bSpherical ? iDimension - gp.iRank : 0]++;
+					}
+					else if( !bSpecialIn_t0 && bSpecialIn_s0 )
+					{
+						if( !iNonCommute_s0 )
+							iISFVectorsUnits[bSpherical ? iDimension - gp.iRank : 0] += 2;
+						else
+						{
+							iISFVectorsUnits[bSpherical ? iDimension - gp.iRank : 0]++;
+							iISFVectorsPowers[bSpherical ? iDimension - gp.iRank : 0]++;
+						}
+					}
+					else if( bSpecialIn_t0 && !bSpecialIn_s0 )
+					{
+						if( iNonCommute_t0 )
+							iISFVectorsPowers[bSpherical ? iDimension - gp.iRank : 0]++;
+					}
+					else
+						iISFVectorsUnits[bSpherical ? iDimension - gp.iRank : 0]++;
+				}
+			}
+			
+			// mise à jour des sommets que l'on ne peut plus prendre
+			for( unsigned int i = 0; i < iVerticesCount; i++ )
+			{
+				if( !grIt.ptr->bVerticesLinkable[i] && !bGPVerticesNonLinkable[i] )
+				{
+					iVerticesFlagged.push_back( i );
+					bGPVerticesNonLinkable[i] = true;		
+				}
+			}
+			
+			// récursion
+			computeGraphsProducts_IS( ++grIt, bSpherical, gp, bGPVerticesNonLinkable );
 			
 			// -----------------------------------------------
 			// dé-initialisations
@@ -2888,7 +3041,7 @@ unsigned int CoxIter::get_iVertexIndex( const string& strVertexLabel ) const
 	map< string, unsigned int >::const_iterator it( map_vertices_labelToIndex.find( strVertexLabel ) );
 	
 	if( it == map_vertices_labelToIndex.end() )
-		throw( string( "INVALID_VERTEX_NAME" ) );
+		throw( string( "CoxIter::get_iVertexIndex: Invalid vertex name: " + strVertexLabel ) );
 	
 	return it->second;
 }
@@ -2896,14 +3049,27 @@ unsigned int CoxIter::get_iVertexIndex( const string& strVertexLabel ) const
 string CoxIter::get_strVertexLabel( const unsigned int& iVertex ) const
 {
 	if( iVertex >= iVerticesCount )
-		throw( 0 );
+		throw( string( "CoxIter::get_strVertexLabel: Invalid vertex index" ) );
 	
 	return map_vertices_indexToLabel[ iVertex ];
+}
+
+vector< string > CoxIter::get_str_map_vertices_indexToLabel() const
+{
+	return map_vertices_indexToLabel;
 }
 
 vector< vector< unsigned int > > CoxIter::get_iCoxeterMatrix() const
 {
 	return iCoxeterMatrix;
+}
+
+unsigned int CoxIter::get_iCoxeterMatrixEntry( const unsigned int& i, const unsigned int& j ) const
+{
+	if( i >= iVerticesCount || j >= iVerticesCount )
+		throw( string("CoxIter::get_iCoxeterMatrixEntry: This entry does not exist") );
+		
+	return iCoxeterMatrix[i][j];
 }
 
 std::map< unsigned int, string > CoxIter::get_strWeights() const
@@ -3290,6 +3456,16 @@ vector< unsigned int > CoxIter::get_iFVector() const
 	return iFVector;
 }
 
+vector< unsigned int > CoxIter::get_iISFVectorsUnits() const
+{
+	return iISFVectorsUnits;
+}
+
+vector< unsigned int > CoxIter::get_iISFVectorsPowers() const
+{
+	return iISFVectorsPowers;
+}
+
 unsigned int CoxIter::get_iVerticesAtInfinityCount() const
 {
 	return iVerticesAtInfinityCount;
@@ -3349,11 +3525,6 @@ bool CoxIter::get_bHasDottedLine() const
 int CoxIter::get_iHasDottedLineWithoutWeight() const
 {
 	return iHasDottedLineWithoutWeight;
-}
-
-string CoxIter::get_str_map_vertices_indexToLabel( const size_t& i ) const
-{
-	return map_vertices_indexToLabel[i];
 }
 
 GraphsList* CoxIter::get_gl_graphsList_spherical() const
@@ -3425,6 +3596,7 @@ void CoxIter::set_sdtoutToFile( const string& strFilename )
 void CoxIter::set_iDimension(const unsigned int& iDimension_)
 {
 	iDimension = iDimension_;
+	iMaximalSubgraphRank = iDimension ? iDimension : iVerticesCount;
 }
 
 void CoxIter::set_iCoxeterMatrix( const vector< vector< unsigned int > >& iMat )
@@ -3443,6 +3615,8 @@ void CoxIter::set_iCoxeterMatrix( const vector< vector< unsigned int > >& iMat )
 	iSphericalMaxRankFound = 0;
 	bDimension_guessed = false;
 	iHasDottedLineWithoutWeight = -1;
+	
+	iMaximalSubgraphRank = iDimension ? iDimension : iVerticesCount;
 }
 
 void CoxIter::set_strOuputMathematicalFormat(const string& strO)

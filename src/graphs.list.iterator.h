@@ -59,6 +59,8 @@ class GraphsListIterator
 		 */
 		GraphsListIterator( GraphsList *gl );
 		
+		GraphsListIterator( const GraphsListIterator& gl );
+		
 		/*!
 		 * \brief Constructeur
 		 * \param gl vers la liste de graphes à considérer
