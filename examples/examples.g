@@ -15,4 +15,7 @@ FVector(buga8);
 #! [ 41, 164, 316, 374, 294, 156, 54, 11, 1 ]
 EulerCharacteristic(buga8);
 #! 24187/8709120000
+g := GrowthSeries(cibugaenko8);;
+Value(g[2],1)/Value(g[1],1) - EulerCharacteristic(cibugaenko8);
+#! 0
 #! @EndExample
