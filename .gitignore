@@ -44,5 +44,6 @@
 *.la
 src/*.lo
 
+compare.sh
 /tmp/
 /gh-pages/
