@@ -18,6 +18,9 @@ gap> FVector(buga8);
 [ 41, 164, 316, 374, 294, 156, 54, 11, 1 ]
 gap> EulerCharacteristic(buga8);
 24187/8709120000
+gap> g := GrowthSeries(cibugaenko8);;
+gap> Value(g[2],1)/Value(g[1],1) - EulerCharacteristic(cibugaenko8);
+0
 ]]></Example>
 
 

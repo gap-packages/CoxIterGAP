@@ -2,8 +2,7 @@
   
   [1XReferences[101X
   
-  [[20XGug15[120X] [16XGuglielmetti, R.[116X, [17XCoxIter - Computing invariants of hyperbolic Coxeter groups[117X, [18XLMS Journal of Computation
-  and Mathematics[118X, [19X18[119X, 1 (2015), 754--773.
+  [[20XGug15[120X] [16XGuglielmetti, R.[116X, [17XCoxIter - Computing invariants of hyperbolic Coxeter groups[117X, [18XLMS Journal of Computation and Mathematics[118X, [19X18[119X, 1 (2015), 754--773.
   
   
   

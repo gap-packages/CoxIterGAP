@@ -1,11 +1,12 @@
   
   [1X1 [33X[0;0YIntroduction[133X[101X
   
+  [33X[0;0YThis chapter gives general information about the [5XGAP[105X package [5XCoxIter[105X.[133X
+  
   
   [1X1.1 [33X[0;0YThe standalone program[133X[101X
   
-  [33X[0;0YThis  chapter  gives  general  information  about  the  [5XGAP[105X package [5XCoxIter[105X.
-  [5XCoxIter[105X  was  first  developped as a standalone C++ program whose goal is to
+  [33X[0;0Y[5XCoxIter[105X  was  first  developped as a standalone C++ program whose goal is to
   compute  invariant  of  hyperbolic  Coxeter groups. We consider a hyperbolic
   Coxeter  group  [22XΓ  ≤ Isom(H^n)[122X and the associated polyhedron [22XP[122X. The input of
   the  program consists a file containing the description of the Coxeter graph
@@ -27,4 +28,67 @@
   
   [33X[0;0YA description of the mathematical results behind [5XCoxIter[105X can be found in the
   article [Gug15].[133X
+  
+  
+  [1X1.2 [33X[0;0YThe [5XGAP[105X[101X[1X package[133X[101X
+  
+  
+  [1X1.2-1 [33X[0;0YEncoding a group[133X[101X
+  
+  [33X[0;0YLet  [22XΓ=⟨  s_1,...,s_d  :  (s_i⋅  s_j)^m_i,j}⟩[122X  be  a  Coxeter  group and let
+  [22XP=⋂_i=1^d  H_i^-[122X be its associated polyhedron. There is two ways to encode [22XΓ[122X
+  in for the package:[133X
+  
+  [30X    [33X[0;6YVia      its      Coxeter     graph:     [2XCreateCoxIterFromCoxeterGraph[102X
+        ([14X???CreateCoxIterFromCoxeterGraph???[114X)[133X
+        [33X[0;6YThe  graph  can  be described with a list containing the neighbours of
+        every  vertex,  together with the weights. [5XCoxIter[105X uses that following
+        convention:[133X
+  
+        [30X    [33X[0;12YIf  the hyperplanes [22XH_i[122X and [22XH_j[122X are parallel, then the weight is
+              0[133X
+  
+        [30X    [33X[0;12YIf  the  hyperplanes  [22XH_i[122X  and  [22XH_j[122X are ultra-parallel, then the
+              weight is 1[133X
+  
+        [33X[0;6YFor example, the graph of the Coxeter group [22Xtilde B_5[122X can be described
+        as follows: [10X [[1,[2,4]],[2,[3,3]],[3,[4,3]],[4,[5,3],[6,3]]] [110X[133X
+  
+  [30X    [33X[0;6YVia     its     Coxeter     matrix:     [2XCreateCoxIterFromCoxeterMatrix[102X
+        ([14X???CreateCoxIterFromCoxeterMatrix???[114X)[133X
+        [33X[0;6YThe  Coxeter matrix [22XM[122X is the symmetric [22Xd× d[122X matrix with entries [22Xm_i,j[122X.
+        Again, we use the following convention:[133X
+  
+        [30X    [33X[0;12YIf the hyperplanes [22XH_i[122X and [22XH_j[122X are parallel, then [22XM_i,j=0[122X[133X
+  
+        [30X    [33X[0;12YIf the hyperplanes [22XH_i[122X and [22XH_j[122X are ultra-parallel, then [22XM_i,j=1[122X[133X
+  
+  
+  [1X1.2-2 [33X[0;0YA complete example[133X[101X
+  
+  [33X[0;0YWe  consider  the 4-dimensional simplex [22X[4,3,3,5][122X whose Coxeter graph is the
+  linear graph with weights 4,3,3,5.[133X
+  [33X[0;0YFirst, we cerate the CoxIter object:[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27Xci := CreateCoxIterFromCoxeterGraph([[1,[2,4]],[2,[3,3]],[3,[4,3]],[127X[104X
+    [4X[28X	[4,[5,5]]],4);[128X[104X
+    [4X[28XCoxIter : Coxeter group with 5 generators in dimension 4[128X[104X
+  [4X[32X[104X
+  
+  [33X[0;0YWe can now ask for one of the invariants:[133X
+  
+  [4X[32X  Example  [32X[104X
+    [4X[25Xgap>[125X [27XEulerCharacteristic(ci);[127X[104X
+    [4X[28X17/28800[128X[104X
+    [4X[25Xgap>[125X [27XCocompact(ci);[127X[104X
+    [4X[28X1[128X[104X
+    [4X[25Xgap>[125X [27XCofinite(ci);[127X[104X
+    [4X[28X1[128X[104X
+    [4X[25Xgap>[125X [27XFVector(ci);[127X[104X
+    [4X[28X[ 5, 10, 10, 5, 1 ][128X[104X
+    [4X[25Xgap>[125X [27Xg := GrowthSeries(ci);;[127X[104X
+    [4X[25Xgap>[125X [27XValue(g[2],1)/Value(g[1],1);[127X[104X
+    [4X[28X17/28800[128X[104X
+  [4X[32X[104X
   

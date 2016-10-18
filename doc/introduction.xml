@@ -1,9 +1,10 @@
 <Chapter Label="Introduction">
 <Heading>Introduction</Heading>
+This chapter gives general information about the &GAP; package &CoxIter;.
 
 <Section Label="section:coxiterprogram">
 	<Heading>The standalone program</Heading>
-	This chapter gives general information about the &GAP; package &CoxIter;. &CoxIter; was first developped as a standalone C++ program whose goal is to compute invariant of hyperbolic Coxeter groups.
+	&CoxIter; was first developped as a standalone C++ program whose goal is to compute invariant of hyperbolic Coxeter groups.
 	We consider a hyperbolic Coxeter group <M>\Gamma \leq \textrm{Isom}(\mathbb{H}^n)</M> and the associated polyhedron <M>P</M>.
 	
 	The input of the program consists a file containing the description of the Coxeter graph of <M>\Gamma</M>. Then, the output consists of the following information:
@@ -17,6 +18,60 @@
 	</List>
 	
 	A description of the mathematical results behind &CoxIter; can be found in the article <Cite Key="guglielmetti15CoxIter"/>.
+</Section>
+
+<Section Label="section:coxitergap">
+	<Heading>The &GAP; package</Heading>
+	
+	<Subsection>
+		<Heading>Encoding a group</Heading>
+		Let <M>\Gamma=\langle s_1,\ldots,s_d : (s_i\cdot s_j)^{m_{i,j}}\rangle</M> be a Coxeter group and let <M>P=\bigcap_{i=1}^d H_i^-</M> be its associated polyhedron. 
+		There is two ways to encode <M>\Gamma</M> in for the package:
+		<List>
+			<Item>
+				Via its Coxeter graph: <Ref Oper="CreateCoxIterFromCoxeterGraph"/><Br />
+				The graph can be described with a list containing the neighbours of every vertex, together with the weights. &CoxIter; uses that following convention:
+				<List>
+					<Item>If the hyperplanes <M>H_i</M> and <M>H_j</M> are parallel, then the weight is 0</Item>
+					<Item>If the hyperplanes <M>H_i</M> and <M>H_j</M> are ultra-parallel, then the weight is 1</Item>
+				</List>
+				For example, the graph of the Coxeter group <M>\tilde B_5</M> can be described as follows:
+				<C>
+					[[1,[2,4]],[2,[3,3]],[3,[4,3]],[4,[5,3],[6,3]]]
+				</C>
+			</Item>
+			<Item>Via its Coxeter matrix: <Ref Oper="CreateCoxIterFromCoxeterMatrix"/><Br /><Br />
+				The Coxeter matrix <M>M</M> is the symmetric <M>d\times d</M> matrix with entries <M>m_{i,j}</M>. Again, we use the following convention:
+				<List>
+					<Item>If the hyperplanes <M>H_i</M> and <M>H_j</M> are parallel, then <M>M_{i,j}=0</M></Item>
+					<Item>If the hyperplanes <M>H_i</M> and <M>H_j</M> are ultra-parallel, then <M>M_{i,j}=1</M></Item>
+				</List>
+			</Item>
+		</List>
+	</Subsection>
+	
+	<Subsection>
+		<Heading>A complete example</Heading>
+		We consider the 4-dimensional simplex <M>[4,3,3,5]</M> whose Coxeter graph is the linear graph with weights 4,3,3,5.<Br />
+		First, we cerate the CoxIter object:
+		<Example>
+gap> ci := CreateCoxIterFromCoxeterGraph([[1,[2,4]],[2,[3,3]],[3,[4,3]],
+	[4,[5,5]]],4);
+CoxIter : Coxeter group with 5 generators in dimension 4</Example>
+		We can now ask for one of the invariants:
+		<Example>
+gap> EulerCharacteristic(ci);
+17/28800
+gap> Cocompact(ci);
+1
+gap> Cofinite(ci);
+1
+gap> FVector(ci);
+[ 5, 10, 10, 5, 1 ]
+gap> g := GrowthSeries(ci);;
+gap> Value(g[2],1)/Value(g[1],1);
+17/28800</Example>
+	</Subsection>
 </Section>
 
 </Chapter>
