@@ -79,7 +79,7 @@ AvailabilityTest := function()
       LogPackageLoadingMessage( PACKAGE_WARNING,
           [ "The program `CoxIter' is not compiled.",
             "See the installation instructions;",
-            "type: ?Installing the Example package" ] );
+            "type: ?Installing the Example package" ] ); # TODO: update this
     fi;
     return file <> fail;
   end,
