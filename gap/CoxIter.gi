@@ -97,7 +97,6 @@ InstallMethod( EulerCharacteristic,
 	function(obj)
 		if obj!.bInvariantsComputed = false then CoxIterCompute(obj); fi;
 		if obj!.bInvariantsComputed = false then return fail; fi;
-		return obj!.rEulerCharacteristic;
 		
 		if HasEulerCharacteristic(obj) then 
 			return EulerCharacteristic(obj);
