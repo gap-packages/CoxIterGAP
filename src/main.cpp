@@ -93,11 +93,18 @@ int main(int argc, char *argv[])
 	ci.set_bCheckCofiniteness( true );
 	ci.set_strOuputMathematicalFormat( "pari" ); // Pretty much the same syntax for polynomials and vectors
 	
-	if( !ci.bRunAllComputations() )
+	
+	ci.exploreGraph();
+	ci.computeGraphsProducts();
+	
+	if( !ci.bEulerCharacteristicFVector() )
 	{
-		cout << "error:" << ci.get_strError() << endl;
+		cout << "error:The specified graph contains a spherical subgraph which has too big rank." << endl;
 		return 0;
 	}
+	
+	ci.isFiniteCovolume();
+	ci.iIsGraphCocompact();
 	
 	// --------------------------------------------
 	// Displaying result

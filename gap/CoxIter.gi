@@ -31,6 +31,7 @@ InstallMethod( CoxIterCompute,
 		# Reading information
 		while true do
 			line := ReadLine(ci_stream);
+			
 			if line = fail then	break; fi;
 			
 			data := SplitString( line, ":" );
