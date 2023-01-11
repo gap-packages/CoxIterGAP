@@ -19,6 +19,9 @@
 /doc/*.toc
 /doc/manual.pdf
 /doc/.fuse_*
+/doc/CoxIter.xml
+/doc/_*.xml
+/doc/title.xml
 
 .deps/
 .dirstamp
