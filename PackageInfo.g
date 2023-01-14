@@ -12,6 +12,7 @@ PackageName := "CoxIter",
 Subtitle := "Computations of invariants of hyperbolic Coxeter groups",
 Version := "1.0b",
 Date := "17/08/2016", # dd/mm/yyyy format
+License := "GPL-3.0-or-later",
 
 Persons := [
   rec(
