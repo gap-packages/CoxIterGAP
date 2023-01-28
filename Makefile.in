@@ -1,68 +1,76 @@
 # sample makefile
+
+GMP_CPPFLAGS = @GMP_CPPFLAGS@
+GMP_LDFLAGS = @GMP_LDFLAGS@
+
+# read GAP's build settings
+GAPPATH = @GAPPATH@
+include $(GAPPATH)/sysinfo.gap
+
+#
 CC = g++
 CXX = g++
-CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -O3 -fopenmp -D_COMPILE_WITHOUT_REGEXP_=1 -D_USE_LOCAL_GMP_=1@GAPCXXFLAGS@
-LDFLAGS = -L/usr/local/lib @GAPLDFLAGS@
-GAPARCH=@GAPARCH@
-BINDIR=bin/@GAPARCH@
-OBJDIR=obj/@GAPARCH@
+CXXFLAGS= -std=c++11 -Wall -Wno-reorder -Wno-unknown-pragmas -pedantic -O3
+BINDIR=bin/$(GAParch)
+OBJDIR=obj/$(GAParch)
 
-all: default
+OBJS = \
+    $(OBJDIR)/main.o \
+    $(OBJDIR)/coxiter.o \
+    $(OBJDIR)/lib/numbers/mpz_rational.o \
+    $(OBJDIR)/lib/numbers/number_template.o \
+    $(OBJDIR)/lib/string.o \
+    $(OBJDIR)/graphs.list.o \
+    $(OBJDIR)/graphs.list.n.o \
+    $(OBJDIR)/graph.o \
+    $(OBJDIR)/graphs.product.set.o \
+    $(OBJDIR)/graphs.product.o \
+    $(OBJDIR)/graphs.list.iterator.o \
+    $(OBJDIR)/lib/polynomials.o
 
-default: main.o graph.o coxiter.o mpz_rational.o number_template.o string.o graphs.list.o graphs.list.n.o graph.o graphs.product.set.o graphs.product.o graphs.list.iterator.o polynomials.o
-	$(CXX) $(CXXFLAGS) $(OBJDIR)/main.o $(OBJDIR)/coxiter.o $(OBJDIR)/mpz_rational.o $(OBJDIR)/number_template.o $(OBJDIR)/string.o $(OBJDIR)/graphs.list.o $(OBJDIR)/graphs.list.n.o $(OBJDIR)/graph.o $(OBJDIR)/graphs.product.set.o $(OBJDIR)/graphs.product.o $(OBJDIR)/graphs.list.iterator.o $(OBJDIR)/polynomials.o -o $(BINDIR)/coxiter $(LDFLAGS)
-	
-main.o : src/main.cpp
-	mkdir -p $(BINDIR)
-	mkdir -p $(OBJDIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-coxiter.o : src/coxiter.cpp src/coxiter.h src/graphs.list.iterator.h src/graphs.list.h src/graphs.product.set.h src/graphs.product.h src/lib/string.h src/lib/numbers/mpz_rational.h src/lib/polynomials.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
+all: $(BINDIR)/coxiter
+
+$(BINDIR)/coxiter: $(OBJS)
+	@mkdir -p $(BINDIR)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $@ $(GMP_LDFLAGS)
+
+$(OBJDIR)/%.o : src/%.cpp Makefile
+	@mkdir -p $(@D)
+	$(CXX) $(CXXFLAGS) $(GMP_CPPFLAGS) -D_COMPILE_WITHOUT_REGEXP_=1 -D_USE_LOCAL_GMP_=1 -c $< -o $@
+
+$(OBJDIR)/coxiter.o : src/coxiter.cpp src/coxiter.h src/graphs.list.iterator.h src/graphs.list.h src/graphs.product.set.h src/graphs.product.h src/lib/string.h src/lib/numbers/mpz_rational.h src/lib/polynomials.h
 
 # ----------------------------------------------------
 # Graphs
-graph.o : src/graph.cpp src/graph.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-graphs.list.o : src/graphs.list.cpp src/graphs.list.h src/graphs.list.n.h 
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-graphs.list.iterator.o : src/graphs.list.iterator.cpp src/graphs.list.iterator.h src/graphs.list.h 
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-graphs.list.n.o : src/graphs.list.n.cpp src/graphs.list.n.h src/graph.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-graphs.product.o : src/graphs.product.cpp src/graphs.product.h src/graph.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-graphs.product.set.o : src/graphs.product.set.cpp src/graphs.product.set.h src/graph.h src/graphs.product.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-# ----------------------------------------------------
-# Other libs	
-string.o : src/lib/string.cpp src/lib/string.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-# ----------------------------------------------------
-# Maths
-mpz_rational.o : src/lib/numbers/mpz_rational.cpp src/lib/numbers/mpz_rational.h src/lib/string.h src/lib/numbers/number_template.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-number_template.o : src/lib/numbers/number_template.cpp src/lib/numbers/number_template.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
-	
-polynomials.o : src/lib/polynomials.cpp src/lib/polynomials.h
-	$(CXX) $(CXXFLAGS) -c $< -o $(OBJDIR)/$@
+$(OBJDIR)/graph.o : src/graph.cpp src/graph.h
+
+$(OBJDIR)/graphs.list.o : src/graphs.list.cpp src/graphs.list.h src/graphs.list.n.h
+
+$(OBJDIR)/graphs.list.iterator.o : src/graphs.list.iterator.cpp src/graphs.list.iterator.h src/graphs.list.h
+
+$(OBJDIR)/graphs.list.n.o : src/graphs.list.n.cpp src/graphs.list.n.h src/graph.h
+
+$(OBJDIR)/graphs.product.o : src/graphs.product.cpp src/graphs.product.h src/graph.h
+
+$(OBJDIR)/graphs.product.set.o : src/graphs.product.set.cpp src/graphs.product.set.h src/graph.h src/graphs.product.h
 
 # ----------------------------------------------------
-# Varia	
+# Other libs
+$(OBJDIR)/lib/string.o : src/lib/string.cpp src/lib/string.h
+
+# ----------------------------------------------------
+# Maths
+$(OBJDIR)/lib/numbers/mpz_rational.o : src/lib/numbers/mpz_rational.cpp src/lib/numbers/mpz_rational.h src/lib/string.h src/lib/numbers/number_template.h
+
+$(OBJDIR)/lib/numbers/number_template.o : src/lib/numbers/number_template.cpp src/lib/numbers/number_template.h
+
+$(OBJDIR)/lib/polynomials.o : src/lib/polynomials.cpp src/lib/polynomials.h
+
+# ----------------------------------------------------
+# Varia
 clean:
-	rm -rf ${OBJDIR}/*.o
-	rm -rf ${OBJDIR}/
-	rm ${BINDIR}/coxiter
-	rm -rf ${BINDIR}/
+	rm -rf ${OBJDIR}
+	rm -rf ${BINDIR}
 
 distclean: clean
 	rm -rf Makefile
@@ -71,3 +79,7 @@ doc:
 	gap -A -q -T < makedocrel.g
 
 .PHONY: all default clean distclean doc
+
+# re-run configure if configure, Makefile.in or GAP itself changed
+Makefile: configure Makefile.in $(GAPPATH)/sysinfo.gap
+	./configure "$(GAPPATH)"
