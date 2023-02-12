@@ -89,32 +89,32 @@ int main(int argc, char *argv[])
 	// Computations
 	CoxIter ci( iCoxeterMatrix, iDimension );
 	
-	ci.set_bCheckCocompactness( true );
-	ci.set_bCheckCofiniteness( true );
-	ci.set_strOuputMathematicalFormat( "pari" ); // Pretty much the same syntax for polynomials and vectors
+	ci.set_checkCocompactness( true );
+	ci.set_checkCofiniteness( true );
+	ci.set_ouputMathematicalFormat( "pari" ); // Pretty much the same syntax for polynomials and vectors
 	
 	
 	ci.exploreGraph();
 	ci.computeGraphsProducts();
 	
-	if( !ci.bEulerCharacteristicFVector() )
+	if( !ci.computeEulerCharacteristicFVector() )
 	{
 		cout << "error:The specified graph contains a spherical subgraph which has too big rank." << endl;
 		return 0;
 	}
 	
-	ci.isFiniteCovolume();
-	ci.iIsGraphCocompact();
+	ci.checkCovolumeFiniteness();
+	ci.isGraphCocompact();
 	
 	// --------------------------------------------
 	// Displaying result
-	cout << "fv:" << ci.get_iIsFiniteCovolume() << endl;
-	cout << "c:" << ci.get_iIsCocompact() << endl;
+	cout << "fv:" << ci.get_isFiniteCovolume() << endl;
+	cout << "c:" << ci.get_isCocompact() << endl;
 	cout << "euler:" << ci.get_brEulerCaracteristic() << endl;
-	if( ci.get_bDimensionGuessed() )
-		cout << "dimensionguessed:" << ci.get_iDimension() << endl;
-	if( ci.get_iDimension() )
-		cout << "fvector:[" << implode( ",", ci.get_iFVector() ) << "]" << endl;
+	if( ci.get_dimensionGuessed() )
+		cout << "dimensionguessed:" << ci.get_dimension() << endl;
+	if( ci.get_dimension() )
+		cout << "fvector:[" << implode( ",", ci.get_fVector() ) << "]" << endl;
 	else
 		cout << "[]" << endl;
 		
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 	vector<unsigned int> iCyclotomicNumerator;
 	vector< mpz_class > iPolynomialDenominator;
 	bool bReduced;
-	ci.get_iGrowthSeries( iCyclotomicNumerator, iPolynomialDenominator, bReduced );
+	ci.get_growthSeries( iCyclotomicNumerator, iPolynomialDenominator, bReduced );
 	unsigned int iDenominatorSize( iPolynomialDenominator.size() );
 	cout << "fnum:" << implode( ",", iCyclotomicNumerator ) << endl;
 	cout << "fden:";
