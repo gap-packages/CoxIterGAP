@@ -3,14 +3,35 @@ The GAP 4 package `CoxIter'
 
 Installation
 ---------------------------------
-CoxIter need to be compiled.
+
+### Installing CoxIter dependencies
+Since CoxIter needs to be compiled, its dependencies must be installed.
+
+#### Ubuntu, Linux Mint or any Debian-based distribution
+
+```
+sudo apt-get install libpcre3-dev libgmp-dev
+```
+
+#### Fedora
+
+```
+sudo dnf install pcre-devel gmp-devel
+```
+
+#### On MacOS, using brew
+```
+brew install pcre++ gmp
+```
+
+### Building CoxIterGAP
 
 If a terminal is opened inside your GAP folder, this can be achieved with the following commands (on Linux, OSX):
 
 	cd pkg/
 	git clone https://github.com/rgugliel/CoxIterGAP
 	cd CoxIterGAP
-	./configure PATH_TO_YOUR_GAP
+	./configure ../../
 	make
 
 Giving a hyperbolic Coxeter group
@@ -56,7 +77,7 @@ With our example, we get:
 	1
 	gap> EulerCharacteristic(cibugaenko8);
 	24187/8709120000
-	gap> g := GrowthSeries(cibugaenko8);;
+	gap> g := GrowthSeries(cibugaenko8);
 	gap> Value(g[2],1)/Value(g[1],1) - EulerCharacteristic(cibugaenko8);
 	0
 

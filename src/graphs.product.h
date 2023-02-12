@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2013, 2014, 2015, 2016
+Copyright (C) 2013-2017
 Rafael Guglielmetti, rafael.guglielmetti@unifr.ch
 */
 
@@ -23,41 +23,43 @@ along with CoxIter. If not, see <http://www.gnu.org/licenses/>.
 /*!
  * \file graphs.product.h
  * \author Rafael Guglielmetti
- * 
+ *
  * \class GraphsProduct
  * \brief: Un produit de graphs
- * 
- * Ces produits sont utilisés de manière volatile dans le programme. Les graphes sont ajoutés dans le std::vector au fur et à mesure.
- * Au contraire, GraphsProductSet est utilisé pour garder les produits de manière persistante; les graphes sont stockés dans un std::set
-*/
+ *
+ * Ces produits sont utilisés de manière volatile dans le programme. Les graphes
+ * sont ajoutés dans le std::vector au fur et à mesure. Au contraire,
+ * GraphsProductSet est utilisé pour garder les produits de manière persistante;
+ * les graphes sont stockés dans un std::set
+ */
 
 #ifndef GRAPHS_PRODUCT_H
 #define GRAPHS_PRODUCT_H
 
-#include <vector>
-#include <string>
 #include <iterator>
+#include <string>
+#include <vector>
 
 #include "graph.h"
 
 using namespace std;
 
-class GraphsProduct
-{
-	public:
-		vector< Graph* > graphs; ///< Pointeurs vers les graphes qui constituent le produit
-		unsigned int iRank; ///< Rank of the product
-		
-	public:
-		GraphsProduct( );
-		
-		/*! \fn createFootPrint
-		 * 	\brief Pour un graphe, crée le "footprint", c'est-à-dire la clé utilisée dans la map CoxIter.graphsProductsCount
-		 * 	\return Clé pour la map
-		 */
-		vector< vector< short unsigned int > > createFootPrint( );
-		
-		friend ostream& operator<<( ostream &o, const GraphsProduct &gp );
+class GraphsProduct {
+public:
+  vector<Graph *> graphs; ///< Pointers to the graphs of the product
+  unsigned int rank;      ///< Rank of the product
+
+public:
+  GraphsProduct();
+
+  /*! \fn createFootPrint
+   * 	\brief Create a footprint for the graph.
+   *  This footprint is used as a key for the map CoxIter.graphsProductsCount
+   *  \return The footprint of the graph
+   */
+  vector<vector<short unsigned int>> createFootPrint();
+
+  friend ostream &operator<<(ostream &o, const GraphsProduct &gp);
 };
 
 #endif // GRAPHS_PRODUCT_H

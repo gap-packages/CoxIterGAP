@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2013, 2014, 2015, 2016
+Copyright (C) 2013-2017
 Rafael Guglielmetti, rafael.guglielmetti@unifr.ch
 */
 
@@ -22,80 +22,78 @@ along with CoxIter. If not, see <http://www.gnu.org/licenses/>.
 
 #include "graphs.list.h"
 
-GraphsList::GraphsList( size_t iVerticesCount, vector< string > *ptr_map_vertices_indexToLabel ) 
-: iVerticesCount( iVerticesCount ), graphsCount( vector< size_t >( iVerticesCount + 1, 0 ) )
-{
-	for( unsigned int i(0); i <= iVerticesCount; ++i )
-		graphs.push_back( GraphsListN( i, ptr_map_vertices_indexToLabel ) );
-	
-	iGraphsCount = 0;
+GraphsList::GraphsList(size_t maxVertices,
+                       vector<string> *ptr_map_vertices_indexToLabel)
+    : maxVertices(maxVertices),
+      graphsCount(vector<size_t>(maxVertices + 1, 0)) {
+  for (unsigned int i(0); i <= maxVertices; ++i)
+    graphs.push_back(GraphsListN(i, ptr_map_vertices_indexToLabel));
+
+  totalGraphsCount = 0;
 }
 
-void GraphsList::addGraph( const std::vector< short unsigned int >& iVertices, const std::vector< bool >& bVerticesLinkable, const unsigned int& iType, bool bSpherical, const unsigned int &iVertexSupp1, const unsigned int &iVertexSupp2, const unsigned int &iDataSupp )
-{
-	size_t sizeTemp, iVCount( iVertices.size( ) );
-	
-	if( bSpherical )
-	{
-		if( iType == 1 || iType == 3 || iType == 4 || iType == 5 || iType == 7 )
-			iVCount++;
-	}
-	else
-	{
-		if( ( iType == 1 && iVCount >= 3 && iDataSupp ) || iType == 2 || ( iType == 3 && iVCount >= 3 ) || ( iType == 4 && iVCount == 5 )) // TBn, TCn, TE6
-			iVCount += 2;
-		else if( ( iType == 0 && iDataSupp ) || iType == 1 || iType == 3 || iType == 4 || iType == 5 || ( iType == 6 && iDataSupp ) ) // TAn ou TB3 ou TD4 ou TEn ou TG_2
-			iVCount++;
-	}
-	
-	sizeTemp = graphs[ iVCount ].size( );
-	graphs[ iVCount ].addGraph( iVertices, bVerticesLinkable, iType, bSpherical, iVertexSupp1, iVertexSupp2, iDataSupp );
-	if( sizeTemp != graphs[ iVCount ].size( ) )
-	{
-		iGraphsCount++;
-		graphsCount[ iVCount ]++;
-	}
+void GraphsList::addGraph(const std::vector<short unsigned int> &vertices,
+                          const std::vector<bool> &linkableVertices,
+                          const unsigned int &type, bool isSpherical,
+                          const unsigned int &vertexSupp1,
+                          const unsigned int &vertexSupp2,
+                          const unsigned int &dataSupp) {
+  size_t sizeTemp, verticesCount(vertices.size());
+
+  if (isSpherical) {
+    if (type == 1 || type == 3 || type == 4 || type == 5 || type == 7)
+      verticesCount++;
+  } else {
+    if ((type == 1 && verticesCount >= 3 && dataSupp) || type == 2 ||
+        (type == 3 && verticesCount >= 3) ||
+        (type == 4 && verticesCount == 5)) // TBn, TCn, TE6
+      verticesCount += 2;
+    else if ((type == 0 && dataSupp) || type == 1 || type == 3 || type == 4 ||
+             type == 5 ||
+             (type == 6 && dataSupp)) // TAn ou TB3 ou TD4 ou TEn ou TG_2
+      verticesCount++;
+  }
+
+  sizeTemp = graphs[verticesCount].size();
+  graphs[verticesCount].addGraph(vertices, linkableVertices, type, isSpherical,
+                                 vertexSupp1, vertexSupp2, dataSupp);
+  if (sizeTemp != graphs[verticesCount].size()) {
+    totalGraphsCount++;
+    graphsCount[verticesCount]++;
+  }
 }
 
-Graph* GraphsList::begin( )
-{
-	if( !iGraphsCount )
-		return 0;
-	
-	for( unsigned int i(1); i <= iVerticesCount; i++ )
-	{
-		if( graphsCount[i] )
-			return graphs[i].begin( );
-	}
-	
-	return 0;
+Graph *GraphsList::begin() {
+  if (!totalGraphsCount)
+    return 0;
+
+  for (unsigned int i(1); i <= maxVertices; i++) {
+    if (graphsCount[i])
+      return graphs[i].begin();
+  }
+
+  return 0;
 }
 
-Graph* GraphsList::next( size_t &iVCount, size_t &iGraphIndex )
-{
-	if( ( ++iGraphIndex ) < graphsCount[ iVCount ] )
-		return graphs[ iVCount ].next( iGraphIndex );
-	else
-	{
-		for( size_t i( iVCount + 1 ); i <= iVerticesCount; i++ )
-		{
-			if( graphsCount[i] )
-			{
-				iVCount = i;
-				iGraphIndex = 0;
-				return graphs[ iVCount ].next( iGraphIndex );
-			}
-		}
-	}
-	
-	return 0;
+Graph *GraphsList::next(size_t &verticesCount, size_t &graphIndex) {
+  if ((++graphIndex) < graphsCount[verticesCount])
+    return graphs[verticesCount].next(graphIndex);
+  else {
+    for (size_t i(verticesCount + 1); i <= maxVertices; i++) {
+      if (graphsCount[i]) {
+        verticesCount = i;
+        graphIndex = 0;
+        return graphs[verticesCount].next(graphIndex);
+      }
+    }
+  }
+
+  return 0;
 }
 
-ostream& operator<<( ostream &o, const GraphsList &g )
-{
-	unsigned int iMax( g.graphs.size( ) );
-	for( unsigned int i(0); i < iMax; ++i )
-		o << g.graphs[i];
-	
-	return o;
+ostream &operator<<(ostream &o, const GraphsList &g) {
+  for (const auto &graph : g.graphs)
+    o << graph;
+
+  return o;
 }
