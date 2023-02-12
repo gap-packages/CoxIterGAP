@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2013, 2014, 2015, 2016
+Copyright (C) 2013-2017
 Rafael Guglielmetti, rafael.guglielmetti@unifr.ch
 */
 
@@ -22,339 +22,294 @@ along with CoxIter. If not, see <http://www.gnu.org/licenses/>.
 
 #include "graphs.list.n.h"
 
-GraphsListN::GraphsListN( unsigned int iVerticesCount, vector< string > *ptr_map_vertices_indexToLabel )
-: iVerticesCount( iVerticesCount ), ptr_map_vertices_indexToLabel( ptr_map_vertices_indexToLabel )
-{
+GraphsListN::GraphsListN(unsigned int verticesCount,
+                         vector<string> *ptr_map_vertices_indexToLabel)
+    : verticesCount(verticesCount),
+      ptr_map_vertices_indexToLabel(ptr_map_vertices_indexToLabel) {}
+
+size_t GraphsListN::size() const { return graphs.size(); }
+
+Graph *GraphsListN::next(const size_t &graphIndex) {
+  return &graphs[graphIndex];
 }
 
-size_t GraphsListN::size( ) const
-{
-	return graphs.size( );
+Graph *GraphsListN::begin() {
+  if (graphs.empty())
+    return 0;
+
+  return &graphs[0];
 }
 
-Graph* GraphsListN::next( const size_t &iGraphIndex )
-{
-	return &graphs[ iGraphIndex ];
+void GraphsListN::addGraph(vector<short unsigned int> vertices,
+                           const vector<bool> &linkableVertices,
+                           const unsigned int &type, bool isSpherical,
+                           const short unsigned int &vertexSupp1,
+                           const short unsigned int &vertexSupp2,
+                           const unsigned int &dataSupp) {
+  unsigned int short temp, i;
+
+  if (isSpherical) {
+    if (type == 0) // An
+    {
+      // on veut une fois les A_n (et pas une fois pour chaque sens de lecture)
+      if (vertices.front() > vertices.back())
+        reverse(vertices.begin(), vertices.end());
+    } else if (type == 1) // Bn
+    {
+      vertices.push_back(vertexSupp1);
+    } else if (type == 3) // Dn
+    {
+      if (verticesCount > 4) {
+        temp = vertices[verticesCount - 2];
+        vertices[verticesCount - 2] = min(temp, vertexSupp1);
+        vertices.push_back(max(temp, vertexSupp1));
+      } else {
+        if (vertices[0] > vertices[2]) {
+          temp = vertices[0];
+          vertices[0] = vertices[2];
+          vertices[2] = temp;
+        }
+
+        if (vertexSupp1 < vertices[0]) {
+          vertices.push_back(vertices[2]);
+          vertices[2] = vertices[0];
+          vertices[0] = vertexSupp1;
+        } else if (vertexSupp1 < vertices[2]) {
+          vertices.push_back(vertices[2]);
+          vertices[2] = vertexSupp1;
+        } else
+          vertices.push_back(vertexSupp1);
+      }
+    } else if (type == 4) // En
+    {
+      if (verticesCount == 6) {
+        if (vertices.front() > vertices.back())
+          reverse(vertices.begin(), vertices.end());
+      }
+      vertices.push_back(vertexSupp1);
+    } else if (type == 5) // Fn
+    {
+      vertices.push_back(vertexSupp1);
+      if (vertices.front() > vertices.back())
+        reverse(vertices.begin(), vertices.end());
+    } else if (type == 7) // Hn
+    {
+      vertices.push_back(vertexSupp1);
+    }
+  } else {
+    if (type == 0 && dataSupp) {
+      int iMinIndex(0);
+      unsigned int iMinValue(vertices[0]);
+
+      vertices.push_back(vertexSupp1);
+      vector<short unsigned int> verticesTemp(vertices);
+
+      // on répère le sommet avec l'indice le plus petit
+      for (i = 1; i < verticesCount; i++) {
+        if (vertices[i] < iMinValue) {
+          iMinValue = vertices[i];
+          iMinIndex = i;
+        }
+      }
+
+      // et le sens de parcours
+      int iDirection(
+          vertices[!iMinIndex ? (verticesCount - 1) : (iMinIndex - 1)] >
+                  vertices[iMinIndex == (int)(verticesCount - 1)
+                               ? 0
+                               : (iMinIndex + 1)]
+              ? 1
+              : -1);
+
+      // on réordonne
+      for (unsigned int j(0); j < verticesCount; j++) {
+        vertices[j] = verticesTemp[iMinIndex];
+
+        iMinIndex += iDirection;
+        if (iMinIndex == -1)
+          iMinIndex = verticesCount - 1;
+        else if (iMinIndex == (int)verticesCount)
+          iMinIndex = 0;
+      }
+    } else if (type == 1) // TBn
+    {
+      if (verticesCount == 4) // TB3
+      {
+        i = vertices[1];
+        temp = max(vertices[0], vertices[2]);
+        vertices[1] = min(vertices[0], vertices[2]);
+        vertices[2] = temp;
+        vertices[0] = i;
+
+        vertices.insert(vertices.begin(), vertexSupp1);
+      } else // autres \tilde Bn
+      {
+        temp = min(vertices[verticesCount - 3], vertexSupp1);
+        vertices.push_back(max(vertices[verticesCount - 3], vertexSupp1));
+        vertices[verticesCount - 3] = temp;
+
+        vertices.insert(vertices.begin(), vertexSupp2);
+      }
+    } else if (type == 2) // \tilde Cn
+    {
+      vertices.insert(vertices.begin(), vertexSupp1);
+      vertices.push_back(vertexSupp2);
+
+      if (vertices[0] > vertices[verticesCount - 1])
+        reverse(vertices.begin(), vertices.end());
+    } else if (type == 3) // \tilde Dn
+    {
+      if (verticesCount >= 6) {
+// le vecteur verticesBase contient la base (i.e. sans les 4 extrémités)
+#ifdef _MSC_VER
+        vector<short unsigned int> verticesBase;
+        temp = verticesCount - 3;
+        for (i = 1; i < temp; i++)
+          verticesBase.push_back(vertices[i]);
+#else
+        vector<short unsigned int> verticesBase(
+            vertices.begin() + 1, vertices.begin() + verticesCount -
+                                      3); // ne marche pas sous Visual Studio
+                                          // 2010 & 2012 malheureusement
+#endif
+
+        // on regarde si on doit modifier l'ordre
+        if (verticesBase[0] > verticesBase[verticesCount - 5]) {
+          reverse(verticesBase.begin(), verticesBase.end());
+
+          // ajout des 4 extrémités
+          verticesBase.push_back(min(vertices[0], vertexSupp1));
+          verticesBase.push_back(max(vertices[0], vertexSupp1));
+          verticesBase.insert(verticesBase.begin(),
+                              max(vertices[verticesCount - 3], vertexSupp2));
+          verticesBase.insert(verticesBase.begin(),
+                              min(vertices[verticesCount - 3], vertexSupp2));
+        } else {
+          // ajout des 4 extrémités
+          verticesBase.push_back(min(vertices[verticesCount - 3], vertexSupp2));
+          verticesBase.push_back(max(vertices[verticesCount - 3], vertexSupp2));
+          verticesBase.insert(verticesBase.begin(),
+                              max(vertices[0], vertexSupp1));
+          verticesBase.insert(verticesBase.begin(),
+                              min(vertices[0], vertexSupp1));
+        }
+
+        vertices = verticesBase;
+      } else // le TD4, "+" est traité différemment
+      {
+        vector<short unsigned int> verticesTemp(4, 0);
+        verticesTemp[0] = vertices[0];
+        verticesTemp[1] = vertices[2];
+        verticesTemp[2] = vertexSupp1;
+        verticesTemp[3] = vertexSupp2;
+        sort(verticesTemp.begin(), verticesTemp.end());
+        verticesTemp.push_back(vertices[1]);
+        vertices = verticesTemp;
+      }
+    } else if (type == 4) // \tilde En
+    {
+      if (verticesCount == 7) // TE6
+      {
+        // TODO: refaire l'encodage de ce graphe et modifer la fonction
+        // bIsSubgraphOf_spherical_euclidean?
+        vector<short unsigned int> verticesTemp;
+        unsigned int iMin(min(min(vertices[1], vertices[3]), vertexSupp1));
+
+        if (iMin == vertices[1]) {
+          verticesTemp.push_back(vertices[0]);
+          verticesTemp.push_back(vertices[1]);
+
+          if (min(vertices[3], vertexSupp1) == vertices[3]) {
+            verticesTemp.push_back(vertices[3]);
+            verticesTemp.push_back(vertices[4]);
+            verticesTemp.push_back(vertexSupp1);
+            verticesTemp.push_back(vertexSupp2);
+          } else {
+            verticesTemp.push_back(vertexSupp1);
+            verticesTemp.push_back(vertexSupp2);
+            verticesTemp.push_back(vertices[3]);
+            verticesTemp.push_back(vertices[4]);
+          }
+        } else if (iMin == vertices[3]) {
+          verticesTemp.push_back(vertices[4]);
+          verticesTemp.push_back(vertices[3]);
+
+          if (min(vertices[1], vertexSupp1) == vertices[1]) {
+            verticesTemp.push_back(vertices[1]);
+            verticesTemp.push_back(vertices[0]);
+            verticesTemp.push_back(vertexSupp1);
+            verticesTemp.push_back(vertexSupp2);
+          } else {
+            verticesTemp.push_back(vertexSupp1);
+            verticesTemp.push_back(vertexSupp2);
+            verticesTemp.push_back(vertices[1]);
+            verticesTemp.push_back(vertices[0]);
+          }
+        } else {
+          verticesTemp.push_back(vertexSupp2);
+          verticesTemp.push_back(vertexSupp1);
+
+          if (min(vertices[1], vertices[3]) == vertices[1]) {
+            verticesTemp.push_back(vertices[1]);
+            verticesTemp.push_back(vertices[0]);
+            verticesTemp.push_back(vertices[3]);
+            verticesTemp.push_back(vertices[4]);
+          } else {
+            verticesTemp.push_back(vertices[3]);
+            verticesTemp.push_back(vertices[4]);
+            verticesTemp.push_back(vertices[1]);
+            verticesTemp.push_back(vertices[0]);
+          }
+        }
+
+        verticesTemp.push_back(vertices[2]);
+        vertices = verticesTemp;
+      } else if (verticesCount == 8) // TE7
+      {
+        if (vertices.front() >
+            vertices.back()) // la base du \tilde E7 est symétrique
+          reverse(vertices.begin(), vertices.end());
+
+        vertices.push_back(vertexSupp1);
+      } else // TE8
+      {
+        vertices.push_back(vertexSupp1);
+      }
+    } else if (type == 5) {
+      vertices.push_back(vertexSupp1);
+    } else if (type == 6 && dataSupp) // \tilde G_2
+    {
+      vertices.push_back(vertexSupp1);
+    }
+  }
+
+  Graph g(vertices, ptr_map_vertices_indexToLabel, linkableVertices, type,
+          isSpherical, dataSupp);
+
+  auto it(lower_bound(graphs.begin(), graphs.end(), g));
+  if (it == graphs.end() || !(*it == g))
+    graphs.insert(it, g);
 }
 
-Graph* GraphsListN::begin( )
-{
-	if( graphs.empty( ) )
-		return 0;
-	
-	return &graphs[0];
+bool GraphsListN::addGraphsList(const GraphsListN &gln) {
+  if (verticesCount != gln.get_verticesCount())
+    return false;
+
+  vector<Graph> gr(gln.get_graphs());
+  graphs.insert(graphs.end(), gr.begin(), gr.end());
+
+  return true;
 }
 
-void GraphsListN::addGraph( vector< short unsigned int > iVertices, const vector< bool > &bVerticesLinkable, const unsigned int &iType, bool bSpherical, const short unsigned int &iVertexSupp1, const short unsigned int &iVertexSupp2, const unsigned int &iDataSupp )
-{
-	unsigned int short iTemp, i;
-	
-	if( bSpherical )
-	{
-		if( iType == 0 ) // An
-		{
-			// on veut une fois les A_n (et pas une fois pour chaque sens de lecture)
-			if( iVertices.front( ) > iVertices.back( ) )
-				reverse( iVertices.begin( ), iVertices.end( ) );
-		}
-		else if( iType == 1 ) // Bn
-		{
-			iVertices.push_back( iVertexSupp1 );
-		}
-		else if( iType == 3 ) // Dn
-		{
-			if( iVerticesCount > 4 )
-			{
-				iTemp = iVertices[ iVerticesCount - 2 ];
-				iVertices[ iVerticesCount - 2 ] = min( iTemp, iVertexSupp1 );
-				iVertices.push_back( max( iTemp, iVertexSupp1 ) );
-			}
-			else
-			{
-				if( iVertices[0] > iVertices[2] )
-				{
-					iTemp = iVertices[0];
-					iVertices[0] = iVertices[2];
-					iVertices[2] = iTemp;
-				}
-				
-				if( iVertexSupp1 < iVertices[0] )
-				{
-					iVertices.push_back( iVertices[2] );
-					iVertices[2] = iVertices[0];
-					iVertices[0] = iVertexSupp1;
-				}
-				else if( iVertexSupp1 < iVertices[2] )
-				{
-					iVertices.push_back( iVertices[2] );
-					iVertices[2] = iVertexSupp1;
-				}
-				else
-					iVertices.push_back( iVertexSupp1 );
-				
-			}
-		}
-		else if( iType == 4 ) // En
-		{
-			if( iVerticesCount == 6 )
-			{
-				if( iVertices.front( ) > iVertices.back( ) )
-					reverse( iVertices.begin( ), iVertices.end( ) );
-			}
-			iVertices.push_back( iVertexSupp1 );
-		}
-		else if( iType == 5 ) // Fn
-		{
-			iVertices.push_back( iVertexSupp1 );
-			if( iVertices.front( ) > iVertices.back( ) )
-				reverse( iVertices.begin( ), iVertices.end( ) );
-		}
-		else if( iType == 7 ) // Hn
-		{
-			iVertices.push_back( iVertexSupp1 );
-		}
-	}
-	else
-	{
-		if( iType == 0 && iDataSupp )
-		{
-			int iMinIndex(0);
-			unsigned int iMinValue( iVertices[0] );
-			
-			iVertices.push_back( iVertexSupp1 );
-			vector< short unsigned int > iVerticesTemp( iVertices );
-			
-			// on répère le sommet avec l'indice le plus petit
-			for( i = 1; i < iVerticesCount; i++ )
-			{
-				if( iVertices[i] < iMinValue )
-				{
-					iMinValue = iVertices[i];
-					iMinIndex = i;
-				}
-			}
-				
-			// et le sens de parcours
-			int iDirection( iVertices[ !iMinIndex ? (iVerticesCount - 1) : (iMinIndex - 1) ] > iVertices[ iMinIndex == (int)( iVerticesCount - 1 ) ? 0 : ( iMinIndex + 1 ) ] ? 1 : -1 );
-			
-			// on réordonne
-			for( unsigned int j(0); j < iVerticesCount; j++ )
-			{
-				iVertices[j] = iVerticesTemp[iMinIndex];
-				
-				iMinIndex += iDirection;
-				if( iMinIndex == -1 )
-					iMinIndex = iVerticesCount - 1;
-				else if( iMinIndex == (int)iVerticesCount )
-					iMinIndex = 0;
-			}
-		}
-		else if( iType == 1 ) // TBn
-		{
-			if( iVerticesCount == 4 ) // TB3
-			{
-				i = iVertices[1];
-				iTemp = max( iVertices[0], iVertices[2] );
-				iVertices[1] = min( iVertices[0], iVertices[2] ); 
-				iVertices[2] = iTemp;
-				iVertices[0] = i;
-				
-				iVertices.insert( iVertices.begin( ), iVertexSupp1 );
-			}
-			else // autres \tilde Bn
-			{	
-				iTemp = min( iVertices[ iVerticesCount - 3 ], iVertexSupp1 );
-				iVertices.push_back( max( iVertices[ iVerticesCount - 3 ], iVertexSupp1 ) );
-				iVertices[ iVerticesCount - 3 ] = iTemp;
-				
-				iVertices.insert( iVertices.begin( ), iVertexSupp2 );
-			}
-		}
-		else if( iType == 2 ) // \tilde Cn
-		{
-			iVertices.insert( iVertices.begin( ), iVertexSupp1 );
-			iVertices.push_back( iVertexSupp2 );
-				
-			if( iVertices[0] > iVertices[ iVerticesCount - 1 ] )
-				reverse( iVertices.begin( ), iVertices.end( ) );
-		}
-		else if( iType == 3 ) // \tilde Dn
-		{
-			if( iVerticesCount >= 6 )
-			{
-				// le vecteur iVerticesBase contient la base (i.e. sans les 4 extrémités)
-				#ifdef _MSC_VER
-					vector< short unsigned int > iVerticesBase;
-					iTemp = iVerticesCount - 3;
-					for( i = 1; i < iTemp; i++ )
-						iVerticesBase.push_back( iVertices[i] );
-				#else
-					vector< short unsigned int > iVerticesBase( iVertices.begin( ) + 1, iVertices.begin( ) + iVerticesCount - 3 ); // ne marche pas sous Visual Studio 2010 & 2012 malheureusement
-				#endif
+unsigned int GraphsListN::get_verticesCount() const { return verticesCount; }
 
-				// on regarde si on doit modifier l'ordre
-				if( iVerticesBase[0] > iVerticesBase[ iVerticesCount - 5 ] )
-				{
-					reverse( iVerticesBase.begin( ), iVerticesBase.end( ) );
-					
-					// ajout des 4 extrémités
-					iVerticesBase.push_back( min( iVertices[0], iVertexSupp1 ) );
-					iVerticesBase.push_back( max( iVertices[0], iVertexSupp1 ) );
-					iVerticesBase.insert( iVerticesBase.begin( ), max( iVertices[ iVerticesCount - 3 ], iVertexSupp2 ) );
-					iVerticesBase.insert( iVerticesBase.begin( ), min( iVertices[ iVerticesCount - 3 ], iVertexSupp2 ) );
-				}
-				else
-				{
-					// ajout des 4 extrémités
-					iVerticesBase.push_back( min( iVertices[ iVerticesCount - 3 ], iVertexSupp2 ) );
-					iVerticesBase.push_back( max( iVertices[ iVerticesCount - 3 ], iVertexSupp2 ) );
-					iVerticesBase.insert( iVerticesBase.begin( ), max( iVertices[0], iVertexSupp1 ) );
-					iVerticesBase.insert( iVerticesBase.begin( ), min( iVertices[0], iVertexSupp1 ) );
-				}
+vector<Graph> GraphsListN::get_graphs() const { return graphs; }
 
-				iVertices = iVerticesBase;
-			}
-			else // le TD4, "+" est traité différemment
-			{
-				vector<short unsigned int> iVerticesTemp( 4, 0 );
-				iVerticesTemp[0] = iVertices[0];
-				iVerticesTemp[1] = iVertices[2];
-				iVerticesTemp[2] = iVertexSupp1;
-				iVerticesTemp[3] = iVertexSupp2;
-				sort( iVerticesTemp.begin( ), iVerticesTemp.end( ) );
-				iVerticesTemp.push_back( iVertices[1] );
-				iVertices = iVerticesTemp;
-			}
-		}
-		else if( iType == 4 ) // \tilde En
-		{
-			if( iVerticesCount == 7 ) // TE6
-			{
-				// TODO: refaire l'encodage de ce graphe et modifer la fonction bIsSubgraphOf_spherical_euclidean?
-				vector< short unsigned int > iVerticesTemp;
-				unsigned int iMin( min( min( iVertices[1], iVertices[3] ), iVertexSupp1 ) );
-				
-				if( iMin == iVertices[1] )
-				{
-					iVerticesTemp.push_back( iVertices[0] );
-					iVerticesTemp.push_back( iVertices[1] );
-					
-					if( min( iVertices[3], iVertexSupp1 ) == iVertices[3] )
-					{
-						iVerticesTemp.push_back( iVertices[3] );
-						iVerticesTemp.push_back( iVertices[4] );
-						iVerticesTemp.push_back( iVertexSupp1 );
-						iVerticesTemp.push_back( iVertexSupp2 );
-					}
-					else
-					{
-						iVerticesTemp.push_back( iVertexSupp1 );
-						iVerticesTemp.push_back( iVertexSupp2 );
-						iVerticesTemp.push_back( iVertices[3] );
-						iVerticesTemp.push_back( iVertices[4] );
-					}
-				}
-				else if( iMin == iVertices[3] )
-				{
-					iVerticesTemp.push_back( iVertices[4] );
-					iVerticesTemp.push_back( iVertices[3] );
-					
-					if( min( iVertices[1], iVertexSupp1 ) == iVertices[1] )
-					{
-						iVerticesTemp.push_back( iVertices[1] );
-						iVerticesTemp.push_back( iVertices[0] );
-						iVerticesTemp.push_back( iVertexSupp1 );
-						iVerticesTemp.push_back( iVertexSupp2 );
-					}
-					else
-					{
-						iVerticesTemp.push_back( iVertexSupp1 );
-						iVerticesTemp.push_back( iVertexSupp2 );
-						iVerticesTemp.push_back( iVertices[1] );
-						iVerticesTemp.push_back( iVertices[0] );
-					}
-				}
-				else
-				{
-					iVerticesTemp.push_back( iVertexSupp2 );
-					iVerticesTemp.push_back( iVertexSupp1 );
-					
-					if( min( iVertices[1], iVertices[3] ) == iVertices[1] )
-					{
-						iVerticesTemp.push_back( iVertices[1] );
-						iVerticesTemp.push_back( iVertices[0] );
-						iVerticesTemp.push_back( iVertices[3] );
-						iVerticesTemp.push_back( iVertices[4] );
-					}
-					else
-					{
-						iVerticesTemp.push_back( iVertices[3] );
-						iVerticesTemp.push_back( iVertices[4] );
-						iVerticesTemp.push_back( iVertices[1] );
-						iVerticesTemp.push_back( iVertices[0] );
-					}	
-				}
-				
-				iVerticesTemp.push_back( iVertices[2] );
-				iVertices = iVerticesTemp;
-			}
-			else if( iVerticesCount == 8  ) // TE7
-			{
-				if( iVertices.front( ) > iVertices.back( ) ) // la base du \tilde E7 est symétrique
-					reverse( iVertices.begin( ), iVertices.end( ) );
-				
-				iVertices.push_back( iVertexSupp1 );
-			}
-			else // TE8
-			{
-				iVertices.push_back( iVertexSupp1 );
-			}
-		}
-		else if( iType == 5 )
-		{
-			iVertices.push_back( iVertexSupp1 );
-		}
-		else if( iType == 6 && iDataSupp ) // \tilde G_2
-		{
-			iVertices.push_back( iVertexSupp1 );
-		}
-	}
-	
-	Graph g( iVertices, ptr_map_vertices_indexToLabel, bVerticesLinkable, iType, bSpherical, iDataSupp );
+ostream &operator<<(ostream &o, const GraphsListN &g) {
+  o << "\tGraphs of rank " << g.verticesCount << endl;
 
-	auto it( lower_bound( graphs.begin(), graphs.end(), g ) );
-	if( it == graphs.end() || !(*it == g) )
-		graphs.insert( it, g );
-}
+  for (const auto &graph : g.graphs)
+    o << graph;
 
-bool GraphsListN::addGraphsList( const GraphsListN& gln )
-{
-	if( iVerticesCount != gln.get_iVerticesCount( ) )
-		return false;
-	
-	vector< Graph > gr( gln.get_graphs( ) );
-	graphs.insert( graphs.end( ), gr.begin( ), gr.end( ) );
-	
-	return true;
-}
-
-unsigned int GraphsListN::get_iVerticesCount( ) const
-{
-	return iVerticesCount;
-}
-
-vector< Graph > GraphsListN::get_graphs( ) const
-{
-	return graphs;
-}
-
-ostream& operator<<( ostream &o, const GraphsListN &g )
-{
-	o << "\tGraphs of rank " << g.iVerticesCount << endl;
-	unsigned int iMax( g.graphs.size( ) );
-	
-	for( unsigned int i(0); i < iMax; ++i )
-		o << g.graphs[i];
-	
-	return o;
+  return o;
 }
