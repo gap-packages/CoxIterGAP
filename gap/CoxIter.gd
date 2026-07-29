@@ -44,13 +44,14 @@ CoxIterType := NewType( CoxIterFamily, IsCoxIter and IsCoxIterRep and IsAttribut
 
 #! @Arguments gr, dimension
 #! @Returns a CoxIter object
-#! @Label CreateCoxIterFromCoxeterGraph
+#! @Label
 #! @Description
 #! Creates a CoxIter object from the Coxeter graph <A>gr</A>. If the dimension <A>dim</A> is unknown, 0 can be given.
 DeclareOperation( "CreateCoxIterFromCoxeterGraph", [ IsList, IsInt ] );
 
 #! @Arguments mat, dimension
 #! @Returns a CoxIter object
+#! @Label
 #! @Description
 #!  Creates a CoxIter object from the Coxeter matrix <A>mat</A>. If the dimension <A>dim</A> is unknown, 0 can be given.
 DeclareOperation( "CreateCoxIterFromCoxeterMatrix", [ IsMatrix, IsInt ] );
